@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Case Study — Chassis Member Failure | Baja SAE 2025</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Barlow:ital,wght@0,300;0,400;0,600;0,700;1,300&family=Barlow+Condensed:wght@500;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:#0b0e14; --card:#131720; --card2:#181d28;
+  --border:#252d3d; --border2:#2e3a50;
+  --accent:#f97316; --accent2:#38bdf8;
+  --danger:#ef4444; --success:#22c55e; --warn:#eab308;
+  --text:#e2e8f4; --sub:#94a3b8; --muted:#64748b;
+  --mono:'Space Mono',monospace; --sans:'Barlow',sans-serif; --cond:'Barlow Condensed',sans-serif;
+  --nav-h:56px; --r:12px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:300;line-height:1.75;font-size:15.5px;overflow-x:hidden}
+img{max-width:100%;display:block}
+a{color:var(--accent2);text-decoration:none}
+sub{font-size:.75em;vertical-align:sub}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(56,189,248,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,.022) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+
+/* ── ① STICKY NAV ── */
+#snav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:rgba(11,14,20,.88);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);z-index:500;display:flex;align-items:center;justify-content:space-between;padding:0 20px;gap:8px}
+.nav-brand{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;flex-shrink:0}
+.nav-brand span{color:var(--muted)}
+.nav-links{display:flex;gap:2px;align-items:center;overflow-x:auto;scrollbar-width:none}
+.nav-links::-webkit-scrollbar{display:none}
+.nav-link{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--sub);padding:6px 11px;border-radius:6px;cursor:pointer;transition:color .2s,background .2s;white-space:nowrap;border:none;background:none}
+.nav-link:hover{color:var(--text);background:rgba(255,255,255,.05)}
+.nav-link.active{color:var(--accent);background:rgba(249,115,22,.1)}
+
+/* ── HERO ── */
+.hero{margin-top:var(--nav-h);padding:56px 20px 44px;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+.hero::after{content:'4g';position:absolute;right:-10px;top:0;font-family:var(--cond);font-size:clamp(100px,22vw,260px);font-weight:800;color:rgba(249,115,22,.04);letter-spacing:-6px;pointer-events:none;user-select:none;line-height:1}
+.hero-inner{max-width:720px;margin:0 auto;position:relative;z-index:1}
+.chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:var(--accent);border:1px solid rgba(249,115,22,.3);padding:3px 10px;border-radius:20px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:18px}
+.chip::before{content:'▶';font-size:7px}
+.hero h1{font-family:var(--cond);font-size:clamp(30px,7vw,62px);font-weight:800;line-height:1.05;letter-spacing:-.5px;margin-bottom:14px}
+.hero h1 em{color:var(--danger);font-style:normal}
+.hero-sub{font-size:15px;color:var(--sub);max-width:600px;margin-bottom:28px}
+.author-line{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin-bottom:16px;margin-top:6px}
+.author-name{font-family:var(--cond);font-size:17px;font-weight:700;color:var(--text);letter-spacing:.01em}
+.author-role{font-family:var(--mono);font-size:10.5px;color:var(--accent);text-transform:uppercase;letter-spacing:.07em}
+.author-inst{font-family:var(--mono);font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+.author-sep{color:var(--border2);font-size:13px}
+.hero-pills{display:flex;flex-wrap:wrap;gap:10px}
+.pill{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 14px}
+.pill .pv{font-family:var(--cond);font-size:20px;font-weight:700;line-height:1}
+.pill .pv.d{color:var(--danger)}.pill .pv.w{color:var(--warn)}.pill .pv.g{color:var(--success)}
+.pill .pl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+
+/* ── ② BENTO CARD LAYOUT ── */
+.page{max-width:760px;margin:0 auto;padding:32px 16px 80px;display:flex;flex-direction:column;gap:18px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:26px 22px;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.4),0 4px 20px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.03);opacity:0;transform:translateY(18px);transition:opacity .45s ease,transform .45s ease}
+.card.visible{opacity:1;transform:none}
+.card::before{content:'';position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:0 2px 2px 0;background:var(--accent);opacity:.5}
+.card.dc::before{background:var(--danger)}.card.sc::before{background:var(--success)}.card.ic::before{background:var(--accent2)}.card.nc::before{background:var(--border2)}
+.sl{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);margin-bottom:10px}
+.sl .n{width:22px;height:22px;border-radius:50%;background:rgba(249,115,22,.12);border:1px solid rgba(249,115,22,.25);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0}
+.sl.dl{color:var(--danger)}.sl.dl .n{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.25);color:var(--danger)}
+.sl.sl2{color:var(--success)}.sl.sl2 .n{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.25);color:var(--success)}
+.sl.il{color:var(--accent2)}.sl.il .n{background:rgba(56,189,248,.12);border-color:rgba(56,189,248,.25);color:var(--accent2)}
+.card h2{font-family:var(--cond);font-size:clamp(20px,4.5vw,32px);font-weight:700;line-height:1.1;margin-bottom:14px;letter-spacing:-.2px}
+.card p{color:var(--sub);font-size:15px;margin-bottom:12px}.card p:last-child{margin-bottom:0}
+.card p strong{color:var(--text);font-weight:600}
+
+/* ── ④ METRICS TABLE ── */
+.mt{width:100%;border-collapse:collapse;font-size:13.5px;margin:16px 0;border-radius:8px;overflow:hidden;border:1px solid var(--border)}
+.mt thead tr{background:rgba(56,189,248,.08);border-bottom:1px solid var(--border2)}
+.mt thead th{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent2);padding:9px 13px;text-align:left;font-weight:400}
+.mt tbody tr{border-bottom:1px solid var(--border)}.mt tbody tr:last-child{border-bottom:none}
+.mt tbody tr:hover{background:rgba(255,255,255,.02)}
+.mt td{padding:10px 13px}.mt td:first-child{font-family:var(--mono);font-size:12px;color:var(--sub);width:42%;background:rgba(0,0,0,.15)}
+.mt td:last-child{color:var(--text)}
+.vd{color:var(--danger);font-weight:700;font-family:var(--mono)}.vs{color:var(--success);font-weight:700;font-family:var(--mono)}.vw{color:var(--warn);font-weight:700;font-family:var(--mono)}.vm{font-family:var(--mono);font-size:12px}
+
+/* ── ④ CALLOUT BOXES ── */
+.cr{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+@media(max-width:540px){.cr{grid-template-columns:1fr}}
+.cb{border-radius:8px;padding:13px 15px;border:1px solid;font-size:14px}
+.cb .ct{font-family:var(--mono);font-size:9.5px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px;display:flex;align-items:center;gap:5px}
+.cb .cx{color:var(--sub);line-height:1.6;font-size:13.5px}.cb .cx strong{color:var(--text);font-weight:600}
+.cb.assumed{background:rgba(56,189,248,.06);border-color:rgba(56,189,248,.2)}.cb.assumed .ct{color:var(--accent2)}
+.cb.reality{background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.2)}.cb.reality .ct{color:var(--danger)}
+.cb.fix{background:rgba(34,197,94,.06);border-color:rgba(34,197,94,.2)}.cb.fix .ct{color:var(--success)}
+.cb.note{background:rgba(249,115,22,.06);border-color:rgba(249,115,22,.2)}.cb.note .ct{color:var(--accent)}
+.cb.info{background:rgba(56,189,248,.05);border-color:rgba(56,189,248,.15)}.cb.info .ct{color:var(--accent2)}
+.cb.full{margin:12px 0}
+
+/* ── TIMELINE ── */
+.tl{padding-left:22px;margin:14px 0;position:relative}
+.tl::before{content:'';position:absolute;left:7px;top:6px;bottom:6px;width:2px;background:linear-gradient(to bottom,var(--danger),rgba(249,115,22,.3),var(--border))}
+.tli{position:relative;margin-bottom:20px}
+.tli::before{content:'';position:absolute;left:-19px;top:7px;width:10px;height:10px;border-radius:50%;background:var(--bg);border:2px solid var(--accent)}
+.tli.d::before{border-color:var(--danger);background:rgba(239,68,68,.15)}.tli.ok::before{border-color:var(--success)}
+.tli h4{font-family:var(--cond);font-size:15px;font-weight:700;color:var(--text);margin-bottom:3px}
+.tli p{font-size:13.5px;color:var(--sub);margin:0}
+
+/* ── RESULT STRIP ── */
+.rs{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
+.rc{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:13px 15px;flex:1;min-width:110px}
+.rc .rl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:4px}
+.rc .rv{font-family:var(--cond);font-size:26px;font-weight:700;line-height:1;color:var(--accent)}
+.rc .ru{font-size:11.5px;color:var(--muted);margin-top:2px}
+.rc.rcd .rv{color:var(--danger)}.rc.rcs .rv{color:var(--success)}.rc.rcw .rv{color:var(--warn)}
+
+/* ── ② GALLERY ── */
+.gal{margin:18px 0 4px}
+.gtitle{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:9px;display:flex;align-items:center;gap:6px}
+.gtitle::before{content:'◈';color:var(--accent2)}
+.gg{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(min(160px,100%),1fr))}
+.gg.g2{grid-template-columns:repeat(2,1fr)}.gg.g3{grid-template-columns:repeat(3,1fr)}.gg.g4{grid-template-columns:repeat(2,1fr)}
+.gth{aspect-ratio:4/3;border-radius:8px;overflow:hidden;cursor:pointer;position:relative;border:1px solid var(--border);background:var(--card2);transition:border-color .2s,transform .2s,box-shadow .2s}
+.gth:hover{border-color:var(--accent2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.gth img{width:100%;height:100%;object-fit:cover;transition:transform .3s}.gth:hover img{transform:scale(1.05)}
+.ph{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:12px}
+.ph .pi{font-size:24px;opacity:.4}.ph .pt{font-size:12px;color:var(--muted);text-align:center}
+.ph .pk{font-family:var(--mono);font-size:9px;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;background:rgba(249,115,22,.08);padding:2px 8px;border-radius:3px}
+.gov{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.7) 0%,transparent 55%);opacity:0;transition:opacity .2s;display:flex;flex-direction:column;justify-content:flex-end;padding:10px}
+.gth:hover .gov{opacity:1}
+.gov .gc{font-size:11px;font-family:var(--mono);color:#fff;line-height:1.3}
+.gov .gi{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);width:26px;height:26px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px}
+
+/* ── ② LIGHTBOX ── */
+#lb{display:none;position:fixed;inset:0;z-index:900;background:rgba(5,7,12,.95);backdrop-filter:blur(8px);flex-direction:column;align-items:center;justify-content:center}
+#lb.open{display:flex}
+#lb-wrap{position:relative;max-width:min(92vw,960px);max-height:78vh;display:flex;align-items:center;justify-content:center}
+#lb-img{max-width:100%;max-height:78vh;border-radius:6px;box-shadow:0 32px 96px rgba(0,0,0,.8);object-fit:contain;user-select:none;touch-action:pinch-zoom}
+#lb-counter{position:absolute;top:-30px;right:0;font-family:var(--mono);font-size:10px;color:var(--muted)}
+#lb-caption{margin-top:12px;max-width:min(92vw,680px);padding:0 16px;text-align:center}
+#lb-sec{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+#lb-cap{font-size:13px;color:var(--sub);line-height:1.5}
+#lb-dots{display:flex;gap:6px;margin-top:12px;justify-content:center;flex-wrap:wrap;max-width:92vw}
+.lbd{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;transition:background .2s,transform .2s}
+.lbd.active{background:var(--accent);transform:scale(1.5)}
+#lb-swipe{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:9.5px;color:rgba(255,255,255,.22);letter-spacing:.1em;pointer-events:none}
+.lba{position:fixed;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#fff;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:background .2s;z-index:901;backdrop-filter:blur(4px)}
+.lba:hover{background:rgba(255,255,255,.14)}
+#lb-prev{left:12px}#lb-next{right:12px}
+#lb-close{position:fixed;top:14px;right:14px;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#fff;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:background .2s;z-index:901}
+#lb-close:hover{background:rgba(239,68,68,.3)}
+@media(max-width:600px){#lb-prev{left:4px}#lb-next{right:4px}.lba{width:36px;height:36px;font-size:14px}}
+
+/* ── ③ BEFORE / AFTER ── */
+.bac{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0}
+@media(max-width:540px){.bac{grid-template-columns:1fr}}
+.bas{display:flex;flex-direction:column;gap:10px}
+.babadge{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:4px 10px;border-radius:4px;align-self:flex-start}
+.babadge.orig{background:rgba(239,68,68,.12);color:var(--danger);border:1px solid rgba(239,68,68,.25)}
+.babadge.redes{background:rgba(34,197,94,.12);color:var(--success);border:1px solid rgba(34,197,94,.25)}
+.bath{aspect-ratio:4/3;border-radius:8px;overflow:hidden;border:1px solid var(--border);background:var(--card2);cursor:pointer;position:relative;transition:border-color .2s,transform .2s}
+.bath:hover{transform:translateY(-2px)}
+.bath.ot{border-color:rgba(239,68,68,.25)}.bath.ot:hover{border-color:var(--danger)}
+.bath.rt{border-color:rgba(34,197,94,.25)}.bath.rt:hover{border-color:var(--success)}
+.bath img{width:100%;height:100%;object-fit:cover}
+.bath .ph{width:100%;height:100%}
+.bath .gov{opacity:0}.bath:hover .gov{opacity:1}
+.bast{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;display:flex;align-items:center;gap:10px}
+.bast .bv{font-family:var(--cond);font-size:24px;font-weight:700;line-height:1;flex-shrink:0}
+.bast .bv.red{color:var(--danger)}.bast .bv.green{color:var(--success)}
+.bast .bl{font-family:var(--mono);font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+
+/* ── NAV SECTION MARKER ── */
+.nsm{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.15em;color:var(--muted);padding:8px 0 4px;display:flex;align-items:center;gap:10px}
+.nsm::after{content:'';flex:1;height:1px;background:var(--border)}
+
+footer{border-top:1px solid var(--border);padding:30px 20px;text-align:center;font-family:var(--mono);font-size:10.5px;color:var(--muted);max-width:760px;margin:0 auto}
+footer strong{color:var(--text)}
+
+/* ── CALC RESULT BADGE (always-visible overlay) ── */
+.res-badge{position:absolute;bottom:8px;left:8px;right:8px;background:rgba(8,11,18,.82);backdrop-filter:blur(6px);border:1px solid rgba(249,115,22,.35);border-radius:6px;padding:6px 9px;display:flex;align-items:center;justify-content:space-between;gap:6px;pointer-events:none}
+.res-badge .rb-label{font-family:var(--mono);font-size:8.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);white-space:nowrap}
+.res-badge .rb-val{font-family:var(--cond);font-size:15px;font-weight:700;color:var(--accent);white-space:nowrap;line-height:1}
+.res-badge.rb-ok .rb-val{color:var(--success)}
+.res-badge.rb-warn .rb-val{color:var(--warn)}
+.res-badge.rb-danger .rb-val{color:var(--danger)}
+.calc-hint{font-family:var(--mono);font-size:9.5px;color:var(--muted);text-align:center;margin-top:8px;letter-spacing:.06em;display:flex;align-items:center;justify-content:center;gap:6px}
+.calc-hint::before,.calc-hint::after{content:'';flex:1;height:1px;background:var(--border)}
+.sub-section{margin-top:22px;border-top:1px solid var(--border2);padding-top:18px}
+.sub-label{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9.5px;text-transform:uppercase;letter-spacing:.13em;color:var(--accent2);margin-bottom:14px}
+.sub-label::before{content:'◈';font-size:11px}
+.sub-label::after{content:'';flex:1;height:1px;background:rgba(56,189,248,.15)}
+.mc-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+@media(max-width:500px){.mc-grid{grid-template-columns:1fr}}
+.mc-field{background:rgba(56,189,248,.04);border:1px solid rgba(56,189,248,.14);border-radius:8px;padding:12px 14px}
+.mc-field .mcf-label{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.mc-field .mcf-label::before{content:'▸';color:var(--accent2);font-size:9px}
+.mc-field .mcf-val{font-family:var(--mono);font-size:13px;color:var(--accent2)}
+.mc-field .mcf-hint{font-size:11.5px;color:var(--muted);margin-top:4px;font-style:italic}
+
+/* ── CALC SHEET STRIP ── */
+.calc-strip-wrap{position:relative;margin:0 -4px}
+.calc-strip{
+  display:flex;
+  gap:10px;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  padding:4px 4px 10px;
+}
+.calc-strip::-webkit-scrollbar{display:none}
+
+/* A4 ratio: 1:1.414 → width : height */
+.cs-thumb{
+  flex:0 0 auto;
+  /* ~A4: width drives height via padding trick */
+  width:clamp(110px,28vw,160px);
+  aspect-ratio:1/1.414;
+  border-radius:8px;
+  overflow:hidden;
+  cursor:pointer;
+  position:relative;
+  border:1px solid var(--border);
+  background:var(--card2);
+  scroll-snap-align:start;
+  transition:border-color .2s,transform .2s,box-shadow .2s;
+}
+.cs-thumb:hover,.cs-thumb:focus-visible{
+  border-color:var(--accent2);
+  transform:translateY(-2px);
+  box-shadow:0 8px 24px rgba(0,0,0,.45);
+  outline:none;
+}
+.cs-inner{width:100%;height:100%;position:relative;display:flex;flex-direction:column}
+.cs-inner img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+
+/* placeholder (when no real image) */
+.cs-ph{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:4px;padding:10px 8px;flex:1;
+}
+.cs-pi{font-size:22px;opacity:.35}
+.cs-pt{font-size:11px;font-family:var(--cond);font-weight:700;color:var(--muted);text-align:center;line-height:1.2}
+.cs-pk{font-family:var(--mono);font-size:8px;color:var(--accent);text-transform:uppercase;letter-spacing:.07em;background:rgba(249,115,22,.09);padding:2px 7px;border-radius:3px;text-align:center;margin-top:2px}
+
+/* result badge at bottom */
+.cs-badge{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:5px 7px;
+  background:rgba(8,11,18,.85);
+  backdrop-filter:blur(5px);
+  border-top:1px solid rgba(249,115,22,.25);
+  display:flex;flex-direction:column;gap:1px;
+  pointer-events:none;
+}
+.cs-badge .rb-label{font-family:var(--mono);font-size:7.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
+.cs-badge .rb-val{font-family:var(--cond);font-size:12px;font-weight:700;line-height:1;color:var(--accent)}
+.cs-badge.rb-ok .rb-val{color:var(--success)}
+.cs-badge.rb-warn .rb-val{color:var(--warn)}
+.cs-badge.rb-danger .rb-val{color:var(--danger)}
+
+/* hover overlay */
+.cs-ov{
+  position:absolute;inset:0;
+  background:linear-gradient(to bottom,transparent 40%,rgba(0,0,0,.72) 100%);
+  opacity:0;transition:opacity .2s;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px;
+}
+.cs-thumb:hover .cs-ov,.cs-thumb:focus-visible .cs-ov{opacity:1}
+.cs-zoom{
+  width:28px;height:28px;border-radius:50%;
+  background:rgba(56,189,248,.18);border:1px solid rgba(56,189,248,.4);
+  display:flex;align-items:center;justify-content:center;font-size:13px;
+}
+.cs-cap{font-family:var(--mono);font-size:9px;color:#fff;text-align:center;line-height:1.3;opacity:.85}
+
+/* scroll hint */
+.cs-scroll-hint{
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.1em;
+  padding:6px 0 0;gap:6px;
+  user-select:none;
+}
+.cs-scroll-hint::before,.cs-scroll-hint::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* keyboard focus ring for strip */
+.calc-strip:focus-visible{outline:2px solid var(--accent2);outline-offset:2px}
+
+/* ── MATERIAL TEST REPORT LINK ── */
+.mtr-link{
+  display:flex;align-items:center;gap:12px;
+  margin-top:16px;
+  padding:13px 16px;
+  background:linear-gradient(135deg,rgba(52,211,153,.07) 0%,rgba(56,189,248,.05) 100%);
+  border:1px solid rgba(52,211,153,.3);
+  border-radius:10px;
+  text-decoration:none;
+  color:inherit;
+  transition:border-color .2s,background .2s,transform .15s,box-shadow .2s;
+  position:relative;
+  overflow:hidden;
+}
+.mtr-link::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:linear-gradient(to bottom,var(--success),rgba(56,189,248,.6));
+  border-radius:0 2px 2px 0;
+}
+.mtr-link:hover,.mtr-link:focus-visible{
+  border-color:rgba(52,211,153,.55);
+  background:linear-gradient(135deg,rgba(52,211,153,.12) 0%,rgba(56,189,248,.08) 100%);
+  transform:translateY(-1px);
+  box-shadow:0 6px 20px rgba(52,211,153,.12);
+  outline:none;
+}
+.mtr-icon{
+  font-size:22px;flex-shrink:0;
+  filter:drop-shadow(0 0 6px rgba(52,211,153,.5));
+}
+.mtr-body{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.mtr-label{
+  font-family:var(--cond);font-size:16px;font-weight:700;
+  color:var(--success);letter-spacing:.02em;line-height:1;
+}
+.mtr-sub{
+  font-family:var(--mono);font-size:10px;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.07em;line-height:1.4;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.mtr-arrow{
+  font-size:18px;color:var(--success);opacity:.7;flex-shrink:0;
+  transition:transform .2s,opacity .2s;
+}
+.mtr-link:hover .mtr-arrow{transform:translate(2px,-2px);opacity:1}
+@media(max-width:400px){
+  .mtr-sub{white-space:normal;font-size:9px}
+  .mtr-label{font-size:14px}
+}
+
+/* ── TOOL BADGES ── */
+.tool-badges{display:flex;flex-wrap:wrap;gap:7px;margin-top:20px}
+.tbadge{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;padding:4px 11px;border-radius:20px;border:1px solid;line-height:1.3;white-space:nowrap}
+.tbadge.ansys{color:#38bdf8;border-color:rgba(56,189,248,.35);background:rgba(56,189,248,.07)}
+.tbadge.sw{color:#fb923c;border-color:rgba(251,146,60,.35);background:rgba(251,146,60,.07)}
+.tbadge.calc{color:#a78bfa;border-color:rgba(167,139,250,.35);background:rgba(167,139,250,.07)}
+.tbadge.astm{color:#34d399;border-color:rgba(52,211,153,.35);background:rgba(52,211,153,.07)}
+</style>
+</head>
+<body>
+
+<!-- LIGHTBOX -->
+<div id="lb" role="dialog" aria-modal="true" aria-label="Image viewer">
+  <button id="lb-close" aria-label="Close">✕</button>
+  <div id="lb-wrap">
+    <span id="lb-counter"></span>
+    <img id="lb-img" src="" alt=""/>
+  </div>
+  <div id="lb-caption">
+    <div id="lb-sec"></div>
+    <div id="lb-cap"></div>
+  </div>
+  <div id="lb-dots"></div>
+  <div id="lb-swipe">← SWIPE OR USE ARROW KEYS →</div>
+  <button class="lba" id="lb-prev">‹</button>
+  <button class="lba" id="lb-next">›</button>
+</div>
+
+<!-- ① STICKY NAV -->
+<nav id="snav">
+  <div class="nav-brand">Arpit Malik <span>/ NSUT · Daedalus Racing</span></div>
+  <div class="nav-links">
+    <button class="nav-link" data-target="sec-summary">Summary</button>
+    <button class="nav-link" data-target="sec-context">Context</button>
+    <button class="nav-link" data-target="sec-validation">Validation</button>
+    <button class="nav-link" data-target="sec-solution">Solution</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-inner">
+    <div class="chip">Structural Failure Analysis · Chassis Engineering</div>
+    <h1>Chassis Member Failure<br/>at <em>Damper Mount</em></h1>
+    <div class="author-line">
+      <span class="author-name">Arpit Malik</span>
+      <span class="author-sep">·</span>
+      <span class="author-role">Chief Design Engineer, Team Daedalus Racing</span>
+      <span class="author-sep">·</span>
+      <span class="author-inst">NSUT, Delhi</span>
+    </div>
+    <p class="hero-sub">High-G suspension testing revealed a critical load-path error — a damper mount 9.5 in from Node 1 converting axial load into bending, generating stresses 31.4% beyond material UTS. Resolved via triangulated load-path redesign, validated in ANSYS.</p>
+    <div class="hero-pills">
+      <div class="pill"><div class="pv d">1031</div><div class="pl">MPa — Peak Stress</div></div>
+      <div class="pill"><div class="pv w">855</div><div class="pl">MPa — S<sub>ult</sub></div></div>
+      <div class="pill"><div class="pv d">0.74</div><div class="pl">FOS Pre-Fix</div></div>
+      <div class="pill"><div class="pv g">~35%</div><div class="pl">Stress Reduction</div></div>
+    </div>
+    <div class="tool-badges">
+      <span class="tbadge ansys">⬡ ANSYS Mechanical</span>
+      <span class="tbadge sw">◈ SolidWorks</span>
+      <span class="tbadge calc">∑ Hand Calculations</span>
+      <span class="tbadge astm">⬢ Material Testing (ASTM)</span>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+
+  <!-- ══ SUMMARY ══ -->
+  <div class="nsm" id="sec-summary">Summary</div>
+
+  <!-- Card: Project Overview + Material Table -->
+  <div class="card ic">
+    <div class="sl il"><span class="n">01</span> Project Overview</div>
+    <h2>Structural Remediation of BAJA ATV Chassis Member</h2>
+    <p>During high-G suspension testing, a primary chassis member experienced <strong>plastic deformation and weld-zone cracking</strong> at the rear damper mounting point under a 4g load case — caused by a fundamental load-path geometry error.</p>
+    <p>I performed a correlation study between <strong>1D analytical beam equations</strong> and <strong>3D FEA in ANSYS</strong>, then implemented a <strong>triangulated load path redirection</strong> — converting bending into axial tension/compression, reducing peak stress by ~35%.</p>
+
+    <!-- ④ MATERIAL PROPERTIES TABLE -->
+    <div class="gtitle" style="margin-top:20px">Material Properties — AISI 4130 Steel (Lab-Verified)</div>
+    <table class="mt">
+      <thead><tr><th>Property</th><th>Symbol</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Material Grade</td><td class="vm">—</td><td class="vm">AISI 4130 CrMo Steel</td></tr>
+        <tr><td>Yield Strength</td><td class="vm">S<sub>y</sub></td><td><span class="vs">763 MPa</span> <span style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-left:4px">Source: Test Report</span></td></tr>
+        <tr><td>Ultimate Tensile Strength</td><td class="vm">S<sub>ult</sub></td><td><span class="vs">855 MPa</span> <span style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-left:4px">Source: Test Report</span></td></tr>
+        <tr><td>Young's Modulus</td><td class="vm">E</td><td class="vm">Edit: e.g. 205 GPa</td></tr>
+        <tr><td>Poisson's Ratio</td><td class="vm">ν</td><td class="vm">Edit: e.g. 0.29</td></tr>
+        <tr><td>Section (OD × WT)</td><td class="vm">—</td><td class="vm">Edit: e.g. 25.4 mm × 1.65 mm</td></tr>
+        <tr><td>Design Load Case</td><td class="vm">—</td><td><span class="vd">4g vertical (high-G test)</span></td></tr>
+        <tr><td>Peak Von Mises Stress</td><td class="vm">σ<sub>VM</sub></td><td><span class="vd">1031 MPa ← exceeds S<sub>ult</sub> by 31.4%</span></td></tr>
+        <tr><td>Factor of Safety (pre-fix)</td><td class="vm">FOS</td><td><span class="vd">0.74 — failure certain</span></td></tr>
+        <tr><td>Stress Reduction (post-fix)</td><td class="vm">Δσ</td><td><span class="vs">~35% via triangulation</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Card: Competition photos -->
+  <div class="card nc">
+    <div class="sl"><span class="n">02</span> Competition Context</div>
+    <h2>The Vehicle &amp; Event</h2>
+    <p>Add competition and vehicle photos below. Click any image to open fullscreen viewer.</p>
+    <div class="gal">
+      <div class="gtitle">Competition &amp; Vehicle Photos</div>
+      <div class="gg g4" data-gallery="bg" data-sn="Competition Context">
+        <div class="gth" data-src="#" data-caption="Vehicle at competition — front view"><div class="ph"><div class="pi">📷</div><div class="pt">Add image</div><div class="pk">Competition</div></div><div class="gov"><div class="gi">🔍</div><div class="gc">Front view</div></div></div>
+        <div class="gth" data-src="#" data-caption="Vehicle — side profile"><div class="ph"><div class="pi">📷</div><div class="pt">Add image</div><div class="pk">Vehicle</div></div><div class="gov"><div class="gi">🔍</div><div class="gc">Side profile</div></div></div>
+        <div class="gth" data-src="learning.pipebending_casestudy.team.HEIC" data-caption="Team Daedalus Racing — Baja SAE 2025 · NSUT, Delhi"><img src="learning.pipebending_casestudy.team.HEIC" alt="Team Daedalus Racing" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/><div class="ph" style="display:none"><div class="pi">📷</div><div class="pt">Team</div><div class="pk">Team</div></div><div class="gov"><div class="gi">🔍</div><div class="gc">Team Daedalus Racing</div></div></div>
+        <div class="gth" data-src="#" data-caption="Track terrain overview"><div class="ph"><div class="pi">📷</div><div class="pt">Add image</div><div class="pk">Track</div></div><div class="gov"><div class="gi">🔍</div><div class="gc">Track</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CONTEXT ══ -->
+  <div class="nsm" id="sec-context">Context</div>
+
+  <!-- Card: ④ Assumptions vs Reality -->
+  <div class="card dc">
+    <div class="sl dl"><span class="n">03</span> Assumptions vs Reality</div>
+    <h2>What Was Designed vs What Happened</h2>
+    <p>The damper mount was placed mid-span on a primary chassis tube — geometrically correct for suspension kinematics, but analytically flawed in structural load path.</p>
+
+    <div class="cr">
+      <div class="cb assumed"><div class="ct">☑ Assumed: Load Path</div><div class="cx">Mount placed <strong>9.5 in away from Node 1</strong> for correct damper angle and stroke geometry.<br/><strong>Assumed:</strong> Member carries load axially — efficient use of tubular section.</div></div>
+      <div class="cb reality"><div class="ct">✕ Reality: Load Path</div><div class="cx">Mid-span transverse load creates <strong>bending moment M = F·a(L−a)/L</strong>. Axial strength of tube is irrelevant — bending dominates entirely.</div></div>
+    </div>
+
+    <div class="cr">
+      <div class="cb assumed"><div class="ct">☑ Assumed: Stress Level</div><div class="cx">Initial design check estimated stresses within safe envelope.<br/><strong>Assumed FOS ≥ 2.0</strong> per Baja SAE structural guidelines.</div></div>
+      <div class="cb reality"><div class="ct">✕ Reality: Stress Level</div><div class="cx">Bending + weld-toe K<sub>t</sub> drives σ<sub>VM</sub> to <strong>1031 MPa</strong>.<br/><strong>Actual FOS = 0.74</strong> — structural failure was mathematically certain.</div></div>
+    </div>
+
+    <div class="cr">
+      <div class="cb assumed"><div class="ct">☑ Assumed: Material Margin</div><div class="cx">S<sub>ult</sub> = 855 MPa assumed sufficient for the design load envelope with standard safety factor applied.</div></div>
+      <div class="cb reality"><div class="ct">✕ Reality: Material Margin</div><div class="cx">Calculated stress <strong>exceeds S<sub>ult</sub> by 31.4%</strong>. Material substitution alone cannot fix a load-path geometry error of this magnitude.</div></div>
+    </div>
+
+    <div class="cb note full"><div class="ct">▶ Key Insight</div><div class="cx">This was not a material failure. It was a <strong>geometry of load path failure</strong>. The correct fix is therefore geometric: redirect loads through triangulation — not material upgrade.</div></div>
+  </div>
+
+  <!-- Card: Failure event -->
+  <div class="card dc">
+    <div class="sl dl"><span class="n">04</span> Failure Event</div>
+    <h2>What Went Wrong — Failure Sequence</h2>
+    <div class="tl">
+      <div class="tli"><h4>Pre-Test Inspection</h4><p>Member visually intact. No pre-existing cracks or deformation at the damper mount joint. Edit: add any pre-test notes.</p></div>
+      <div class="tli d"><h4>4g Load Applied — Failure Initiates</h4><p>High-G suspension load applied at rear damper. Transverse force at mid-span generates bending moment. Calculated σ<sub>VM</sub> = <strong>1031 MPa</strong> at bracket mount position — exceeds S<sub>ult</sub> = 855 MPa.</p></div>
+      <div class="tli d"><h4>Plastic Deformation &amp; Weld Cracking</h4><p>Visible plastic deformation of tube cross-section at mount. Weld-zone cracking propagates from the stress concentration at the mount–member interface.</p></div>
+      <div class="tli ok"><h4>Test Halted — Investigation Begins</h4><p>Testing stopped. Member removed for inspection. Fracture surface and deformation documented as input to root cause analysis.</p></div>
+    </div>
+    <div class="gal">
+      <div class="gtitle">Failure Photos — Field Evidence</div>
+      <div class="gg g3" data-gallery="failure" data-sn="Failure Evidence">
+        <div class="gth" data-src="#" data-caption="Failure site — overview showing plastic deformation at mid-span mount"><div class="ph"><div class="pi">📷</div><div class="pt">Failure photo</div><div class="pk">Failure Site</div></div><div class="gov"><div class="gi">🔍</div><div class="gc">Overview</div></div></div>
+        <div class="gth" data-src="#" data-caption="Close-up — weld zone cracking at damper mount interface. Crack initiation visible."><div class="ph"><div class="pi">📷</div><div class="pt">Crack close-up</div><div class="pk">Weld Crack</div></div><div class="gov"><div class="gi">🔍</div><div class="gc">Weld crack</div></div></div>
+        <div class="gth" data-src="#" data-caption="Second angle — extent of plastic deformation along tube cross-section"><div class="ph"><div class="pi">📷</div><div class="pt">Second angle</div><div class="pk">Deformation</div></div><div class="gov"><div class="gi">🔍</div><div class="gc">Deformation</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card: Root Cause -->
+  <div class="card dc">
+    <div class="sl dl"><span class="n">05</span> Root Cause Analysis</div>
+    <h2>Why the Failure Occurred</h2>
+    <p>Force decomposition under the 4g load case precisely isolated the failure mechanism. The mid-span mount placement converted the chassis tube into a simply-supported beam under concentrated loading — worst possible geometry for a tube.</p>
+    <div class="cb info full"><div class="ct">◈ Analytical Method — Euler–Bernoulli Beam Theory</div><div class="cx">(1) Decompose damper axis force into transverse &amp; axial components at mount node under 4g.<br/>(2) Free-body diagram of chassis member.<br/>(3) Bending moment: M = F·a(L−a)/L (peak at mount, a = 9.5 in from Node 1).<br/>(4) Bending stress: σ<sub>b</sub> = M·c/I (extreme fibre); τ from shear; σ<sub>axial</sub> = F<sub>∥</sub>/A<sub>pipe</sub>.<br/>(5) Von Mises: σ<sub>VM</sub> = √(σ² + 3τ²) where σ = σ<sub>axial</sub> + σ<sub>b</sub> → <strong>1031 MPa</strong>.<br/>(6) FOS = S<sub>yield</sub>/σ<sub>VM</sub> = 763/1031 = <strong>0.74</strong> — failure certain.</div></div>
+    <div class="rs">
+      <div class="rc rcd"><div class="rl">Calculated σ<sub>VM</sub></div><div class="rv">1031</div><div class="ru">MPa at weld toe</div></div>
+      <div class="rc rcw"><div class="rl">S<sub>ult</sub> Material</div><div class="rv">855</div><div class="ru">MPa lab-verified</div></div>
+      <div class="rc rcd"><div class="rl">FOS Pre-Fix</div><div class="rv">0.74</div><div class="ru">Failure certain</div></div>
+    </div>
+  </div>
+
+  <!-- ══ VALIDATION ══ -->
+  <div class="nsm" id="sec-validation">Validation</div>
+
+  <!-- Card: Analytical Verification & FEA Validation (V&V) -->
+  <div class="card">
+    <div class="sl"><span class="n">06</span> Analytical Verification &amp; FEA Validation (V&amp;V)</div>
+    <h2>1D Beam Theory Workings</h2>
+    <p>I performed a <strong>First-Principles Analytical Validation</strong> using <strong>Euler–Bernoulli Beam Theory</strong> and the <strong>Von Mises Yield Criterion</strong>. By resolving <strong>3D force vectors</strong> from CAD, I accounted for combined bending and torsional loads, validating the failure mode against <strong>lab-tested material properties (AISI 4130)</strong>.</p>
+    <div class="cr">
+      <div class="cb reality"><div class="ct">Pre-Fix Result</div><div class="cx">σ<sub>VM</sub> = <strong>1031 MPa</strong><br/>FOS = S<sub>yield</sub>/σ<sub>VM</sub> = 763/1031 = <strong>0.74</strong><br/>Mode: bending + axial at bracket mount</div></div>
+      <div class="cb fix"><div class="ct">Post-Fix Prediction</div><div class="cx">Triangulation → M ≈ 0 at node<br/>Load path: axial T/C only<br/>Predicted reduction: <strong>~35%</strong></div></div>
+    </div>
+    <!-- CALC SHEETS STRIP -->
+    <div class="gal">
+      <div class="gtitle">Handwritten Calculation Sheets — tap any sheet to expand</div>
+
+      <!-- horizontal scroll strip -->
+      <div class="calc-strip-wrap">
+        <div class="calc-strip" id="calcStrip">
+
+          <div class="cs-thumb" data-src="learning.pipebending_casestudy.cal1.jpeg" data-caption="Sheet 1 — 3D Force Decomposition. Damper axis force resolved into transverse (F⊥) and axial (F∥) components at the bracket mount node under the 4g load case. Free-body diagram drawn with boundary reactions at Node 1 and Node 2." data-badge-class="rb-warn" data-badge-label="Key output" data-badge-val="F⊥, F∥ resolved">
+            <div class="cs-inner">
+              <img src="learning.pipebending_casestudy.cal1.jpeg" alt="Sheet 1 — Force Decomposition" loading="lazy"/>
+              <div class="cs-ph" style="display:none"><div class="cs-pi">📝</div><div class="cs-pt">Sheet 1</div><div class="cs-pk">FBD &amp; Force Decomp.</div></div>
+              <div class="cs-badge rb-warn"><span class="rb-label">Key output</span><span class="rb-val">F⊥, F∥ resolved</span></div>
+              <div class="cs-ov"><div class="cs-zoom">🔍</div><div class="cs-cap">Sheet 1 — Force Decomp.</div></div>
+            </div>
+          </div>
+
+          <div class="cs-thumb" data-src="learning.pipebending_casestudy.cal2.jpeg" data-caption="Sheet 2 — Bending Moment &amp; Section Stress. BMD drawn for simply-supported beam with concentrated load at a = 9.5 in from Node 1. Peak moment M = F⊥·a(L−a)/L calculated at bracket position. Extreme fibre bending stress σ_b = Mc/I computed." data-badge-class="rb-danger" data-badge-label="Peak moment" data-badge-val="M = F·a(L−a)/L">
+            <div class="cs-inner">
+              <img src="learning.pipebending_casestudy.cal2.jpeg" alt="Sheet 2 — BMD &amp; σ_b" loading="lazy"/>
+              <div class="cs-ph" style="display:none"><div class="cs-pi">📝</div><div class="cs-pt">Sheet 2</div><div class="cs-pk">BMD &amp; σ_b</div></div>
+              <div class="cs-badge rb-danger"><span class="rb-label">Peak moment</span><span class="rb-val">M = F·a(L−a)/L</span></div>
+              <div class="cs-ov"><div class="cs-zoom">🔍</div><div class="cs-cap">Sheet 2 — BMD &amp; σ_b</div></div>
+            </div>
+          </div>
+
+          <div class="cs-thumb" data-src="learning.pipebending_casestudy.cal3.jpeg" data-caption="Sheet 3 — Von Mises Stress &amp; FOS. Combined stress state: σ = σ_axial + σ_b; shear τ from transverse load. Von Mises criterion applied: σ_VM = √(σ² + 3τ²). Result: σ_VM = 1031.17 MPa. FOS = S_yield / σ_VM = 763 / 1031 = 0.74 — failure certain." data-badge-class="rb-danger" data-badge-label="Result" data-badge-val="σ_VM = 1031 MPa">
+            <div class="cs-inner">
+              <img src="learning.pipebending_casestudy.cal3.jpeg" alt="Sheet 3 — Von Mises &amp; FOS" loading="lazy"/>
+              <div class="cs-ph" style="display:none"><div class="cs-pi">📝</div><div class="cs-pt">Sheet 3</div><div class="cs-pk">Von Mises &amp; FOS</div></div>
+              <div class="cs-badge rb-danger"><span class="rb-label">Result</span><span class="rb-val">σ_VM = 1031 MPa</span></div>
+              <div class="cs-ov"><div class="cs-zoom">🔍</div><div class="cs-cap">Sheet 3 — Von Mises · FOS 0.74</div></div>
+            </div>
+          </div>
+
+          <div class="cs-thumb" data-src="learning.pipebending_casestudy.cal4.jpeg" data-caption="Sheet 4 — Section Properties &amp; Moment of Inertia. Tubular cross-section geometry: OD, wall thickness, area A, second moment of area I, and extreme fibre distance c. These values feed directly into σ_b = Mc/I and σ_axial = F∥/A." data-badge-class="rb-warn" data-badge-label="Output" data-badge-val="I, c, A computed">
+            <div class="cs-inner">
+              <img src="learning.pipebending_casestudy.cal4.jpeg" alt="Sheet 4 — Section Properties" loading="lazy"/>
+              <div class="cs-ph" style="display:none"><div class="cs-pi">📝</div><div class="cs-pt">Sheet 4</div><div class="cs-pk">Section Properties</div></div>
+              <div class="cs-badge rb-warn"><span class="rb-label">Output</span><span class="rb-val">I, c, A computed</span></div>
+              <div class="cs-ov"><div class="cs-zoom">🔍</div><div class="cs-cap">Sheet 4 — Section Props</div></div>
+            </div>
+          </div>
+
+          <div class="cs-thumb" data-src="learning.pipebending_casestudy.cal5.jpeg" data-caption="Sheet 5 — Shear Stress &amp; Stress Concentration. Transverse shear τ = VQ/Ib at the neutral axis. Weld-toe stress concentration factor K_t applied — shows how K_t amplifies local stress and pushes σ_VM to the failure threshold." data-badge-class="rb-danger" data-badge-label="K_t applied" data-badge-val="τ + stress conc.">
+            <div class="cs-inner">
+              <img src="learning.pipebending_casestudy.cal5.jpeg" alt="Sheet 5 — Shear &amp; K_t" loading="lazy"/>
+              <div class="cs-ph" style="display:none"><div class="cs-pi">📝</div><div class="cs-pt">Sheet 5</div><div class="cs-pk">Shear &amp; K_t</div></div>
+              <div class="cs-badge rb-danger"><span class="rb-label">K_t applied</span><span class="rb-val">τ + stress conc.</span></div>
+              <div class="cs-ov"><div class="cs-zoom">🔍</div><div class="cs-cap">Sheet 5 — Shear &amp; K_t</div></div>
+            </div>
+          </div>
+
+          <div class="cs-thumb" data-src="learning.pipebending_casestudy.cal6.jpeg" data-caption="Sheet 6 — Triangulation Geometry &amp; Load Redistribution. New member angle, length, and connection coordinates derived from CAD. Shows how the triangulating member routes transverse load into axial components only — eliminating the bending moment at the mount node." data-badge-class="rb-ok" data-badge-label="Fix geometry" data-badge-val="M → 0 at node">
+            <div class="cs-inner">
+              <img src="learning.pipebending_casestudy.cal6.jpeg" alt="Sheet 6 — Triangulation Geometry" loading="lazy"/>
+              <div class="cs-ph" style="display:none"><div class="cs-pi">📝</div><div class="cs-pt">Sheet 6</div><div class="cs-pk">Triangulation Geom.</div></div>
+              <div class="cs-badge rb-ok"><span class="rb-label">Fix geometry</span><span class="rb-val">M → 0 at node</span></div>
+              <div class="cs-ov"><div class="cs-zoom">🔍</div><div class="cs-cap">Sheet 6 — Triangulation</div></div>
+            </div>
+          </div>
+
+          <div class="cs-thumb" data-src="learning.pipebending_casestudy.cal7.jpeg" data-caption="Sheet 7 — Post-Fix Axial Stress Check &amp; FOS Verification. Triangulated redesign: bending moment M ≈ 0 at true truss node. Axial stress σ = F/A calculated for the new triangulating member. Predicted peak stress reduction ~35%. FOS post-fix &gt; 1.0 confirmed analytically." data-badge-class="rb-ok" data-badge-label="Post-fix FOS" data-badge-val=">1.0 confirmed">
+            <div class="cs-inner">
+              <img src="learning.pipebending_casestudy.cal7.jpeg" alt="Sheet 7 — Post-Fix &amp; FOS" loading="lazy"/>
+              <div class="cs-ph" style="display:none"><div class="cs-pi">📝</div><div class="cs-pt">Sheet 7</div><div class="cs-pk">Post-Fix &amp; FOS</div></div>
+              <div class="cs-badge rb-ok"><span class="rb-label">Post-fix FOS</span><span class="rb-val">&gt;1.0 confirmed</span></div>
+              <div class="cs-ov"><div class="cs-zoom">🔍</div><div class="cs-cap">Sheet 7 — Post-Fix · FOS &gt; 1.0</div></div>
+            </div>
+          </div>
+
+        </div>
+        <!-- scroll hint -->
+        <div class="cs-scroll-hint" id="csScrollHint">
+          <span>← swipe or use arrow keys →</span>
+        </div>
+      </div>
+
+      <!-- Material Test Report link -->
+      <a class="mtr-link" href="#" id="mtrLink">
+        <span class="mtr-icon">⬢</span>
+        <span class="mtr-body">
+          <span class="mtr-label">Material Test Report</span>
+          <span class="mtr-sub">AISI 4130 · ASTM-Verified · S<sub>y</sub> = 763 MPa · S<sub>ult</sub> = 855 MPa</span>
+        </span>
+        <span class="mtr-arrow">↗</span>
+      </a>
+
+    </div>
+  </div>
+
+  <!-- Card: FEA Setup + Mesh convergence -->
+  <div class="card ic">
+    <div class="sl il"><span class="n">07</span> FEA Setup — ANSYS</div>
+    <h2>3D Model &amp; Mesh Convergence</h2>
+    <p>3D FEA correlation study in ANSYS — same boundary conditions as the 1D analytical model. Both methods independently confirmed failure at identical location and magnitude, validating the analytical approach.</p>
+    <table class="mt">
+      <thead><tr><th>Parameter</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Software</td><td>ANSYS Mechanical</td></tr>
+        <tr><td>Analysis Type</td><td class="vm">Static Structural — Linear</td></tr>
+        <tr><td>Element Type</td><td class="vm">Edit: e.g. SOLID186 / BEAM188</td></tr>
+        <tr><td>Mesh — Global Size</td><td class="vm">Edit: e.g. 5 mm</td></tr>
+        <tr><td>Mesh — Refined Zone</td><td class="vm">Edit: e.g. 1 mm at weld toe</td></tr>
+        <tr><td>Material Model</td><td class="vm">Linear elastic, isotropic</td></tr>
+        <tr><td>Applied Load</td><td><span class="vd">4g vertical — damper axis direction</span></td></tr>
+        <tr><td>Boundary Conditions</td><td class="vm">Edit: e.g. Fixed at both tube-end nodes</td></tr>
+        <tr><td>Convergence Criterion</td><td class="vm">&lt;2% change in peak σ<sub>VM</sub> on refinement</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ── MESH CONVERGENCE SUB-SECTION ── -->
+    <div class="sub-section">
+      <div class="sub-label">Mesh Convergence</div>
+      <div class="mc-grid">
+        <div class="mc-field">
+          <div class="mcf-label">Element Type</div>
+          <div class="mcf-val">Edit: e.g. Tet10 / Shell181</div>
+          <div class="mcf-hint">SOLID186, BEAM188, SHELL181 — specify the element formulation used for this study</div>
+        </div>
+        <div class="mc-field">
+          <div class="mcf-label">Convergence Criterion Met</div>
+          <div class="mcf-val">Edit: e.g. &lt;2% Δσ<sub>VM</sub></div>
+          <div class="mcf-hint">Refinement step at which results stabilised — add final element size and iteration count</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gal">
+      <div class="gtitle">Mesh Convergence Screenshots — Element Size vs Peak σ<sub>VM</sub></div>
+      <div class="gg g2" data-gallery="fea-mesh" data-sn="Mesh Convergence">
+        <div class="gth" data-src="#" data-caption="Convergence graph — peak Von Mises stress vs element size. Results stabilised at &lt;2% variance between refinement steps. Add your plot here."><div class="ph"><div class="pi">📊</div><div class="pt">Convergence graph</div><div class="pk">σ vs Mesh Size</div></div><div class="gov"><div class="gi">🔍</div><div class="gc">Convergence graph</div></div></div>
+        <div class="gth" data-src="#" data-caption="Refined mesh at failure zone — 1 mm element size at weld toe. Showing element quality at critical location."><div class="ph"><div class="pi">🔬</div><div class="pt">Refined mesh</div><div class="pk">Mesh Detail</div></div><div class="gov"><div class="gi">🔍</div><div class="gc">Refined mesh</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card: FEA Pre-Fix Results -->
+  <div class="card dc">
+    <div class="sl dl"><span class="n">08</span> FEA Results — Pre-Fix Failure</div>
+    <h2>ANSYS — Failure Confirmed at 1031 MPa</h2>
+    <p>FEA independently confirms bending-dominated failure at the mid-span damper mount. Peak Von Mises stress at weld toe matches the 1D analytical prediction — validating the model and the diagnosis.</p>
+    <div class="rs">
+      <div class="rc rcd"><div class="rl">FEA Peak σ<sub>VM</sub></div><div class="rv">1031</div><div class="ru">MPa — weld toe</div></div>
+      <div class="rc rcd"><div class="rl">S<sub>ult</sub> exceeded by</div><div class="rv">+31.4%</div><div class="ru">Fracture zone</div></div>
+      <div class="rc rcd"><div class="rl">FEA FOS</div><div class="rv">0.74</div><div class="ru">Failure confirmed</div></div>
+      <div class="rc"><div class="rl">1D ↔ 3D Correlation</div><div class="rv" style="color:var(--success)">✓</div><div class="ru">Methods agree</div></div>
+    </div>
+    <div class="gal">
+      <div class="gtitle">FEA Contour Plots — Pre-Fix (4 Screenshots)</div>
+      <div class="gg g4" data-gallery="fea-prefix" data-sn="FEA Pre-Fix Results">
+        <div class="gth" data-src="#" data-caption="Von Mises stress — full assembly. Peak stress concentration clearly visible at mid-span mount node."><div class="ph"><div class="pi">🌡️</div><div class="pt">Von Mises — full</div><div class="pk">Full Assembly</div></div><div class="gov"><div class="gi">🔍</div><div class="gc">Von Mises full</div></div></div>
+        <div class="gth" data-src="#" data-caption="Von Mises stress — close-up at failure zone. 1031 MPa peak at weld toe of damper mount."><div class="ph"><div class="pi">🌡️</div><div class="pt">Von Mises — close-up</div><div class="pk">Failure Zone</div></div><div class="gov"><div class="gi">🔍</div><div class="gc">Failure zone</div></div></div>
+        <div class="gth" data-src="#" data-caption="Total deformation plot — maximum displacement at mid-span, consistent with bending mode failure."><div class="ph"><div class="pi">📐</div><div class="pt">Deformation</div><div class="pk">Deformation</div></div><div class="gov"><div class="gi">🔍</div><div class="gc">Deformation</div></div></div>
+        <div class="gth" data-src="#" data-caption="Safety factor distribution — FOS &lt; 1 region clearly visible at mount. Confirms analytical FOS = 0.74."><div class="ph"><div class="pi">⚠️</div><div class="pt">FOS map</div><div class="pk">Safety Factor</div></div><div class="gov"><div class="gi">🔍</div><div class="gc">FOS map</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SOLUTION ══ -->
+  <div class="nsm" id="sec-solution">Solution</div>
+
+  <!-- Card: Decision -->
+  <div class="card sc">
+    <div class="sl sl2"><span class="n">09</span> Engineering Decision</div>
+    <h2>Triangulated Load Path Redirection</h2>
+    <p>The fix targets the root cause — not the symptom. Rather than upsizing the original member, I eliminated the bending moment by adding a triangulating member from the damper mount node to an adjacent frame node.</p>
+    <div class="cr">
+      <div class="cb reality"><div class="ct">✕ Rejected: Upsize Original Member</div><div class="cx">Increasing OD or wall thickness reduces stress but does not eliminate bending. The load-path geometry remains flawed. Adds weight. Does not address root cause.</div></div>
+      <div class="cb fix"><div class="ct">✓ Chosen: Triangulation</div><div class="cx">New member welded from mount node to adjacent chassis node. All members become two-force (axial only). Bending moment M → ≈ 0. Stress drops ~35%. Minimal weight impact.</div></div>
+    </div>
+    <div class="cb info full"><div class="ct">◈ Why Triangulation Eliminates Bending</div><div class="cx">In a triangulated truss node, every member intersects at a common point. A load at the node resolves into pure axial forces in all connected members — no moment arm, no bending. The eccentricity <em>e</em> (which drove M = F·e in the original mid-span mount) is reduced to zero by routing load through the joint directly.</div></div>
+  </div>
+
+  <!-- Card: ③ BEFORE / AFTER COMPARISON -->
+  <div class="card">
+    <div class="sl sl2"><span class="n">10</span> Before &amp; After Comparison</div>
+    <h2>FEA — Original vs Triangulated Redesign</h2>
+    <p>Same boundary conditions, same 4g load case. Direct stress comparison between original mid-span mount and the triangulated redesign. Click either image to open in full-screen and scroll between them.</p>
+
+    <!-- ③ BA CONTAINER — desktop side-by-side / mobile stacked -->
+    <div class="bac">
+      <div class="bas">
+        <div class="babadge orig">✕ Original Design</div>
+        <div class="bath ot" data-src="#" data-caption="Von Mises stress — original design. 1031 MPa at weld toe. FOS = 0.74. Failure certain." data-gallery-id="comparison" data-gallery-index="0">
+          <div class="ph"><div class="pi">🌡️</div><div class="pt">Add FEA screenshot — Original stress contour</div><div class="pk">Original — Stress</div></div>
+          <div class="gov"><div class="gi">🔍</div><div class="gc">Original — Von Mises</div></div>
+        </div>
+        <div class="bast">
+          <div class="bv red">1031</div>
+          <div><div class="bl">Peak σ<sub>VM</sub> (MPa)</div><div style="font-size:12px;color:var(--danger);font-family:var(--mono)">FOS = 0.74 — FAILURE</div></div>
+        </div>
+      </div>
+
+      <div class="bas">
+        <div class="babadge redes">✓ Triangulated Redesign</div>
+        <div class="bath rt" data-src="#" data-caption="Von Mises stress — triangulated redesign. ~35% stress reduction. FOS > 1.0 confirmed. 2025 season cleared." data-gallery-id="comparison" data-gallery-index="1">
+          <div class="ph"><div class="pi">🌡️</div><div class="pt">Add FEA screenshot — Redesign stress contour</div><div class="pk">Redesign — Stress</div></div>
+          <div class="gov"><div class="gi">🔍</div><div class="gc">Redesign — Von Mises</div></div>
+        </div>
+        <div class="bast">
+          <div class="bv green">~670</div>
+          <div><div class="bl">Peak σ<sub>VM</sub> (MPa)</div><div style="font-size:12px;color:var(--success);font-family:var(--mono)">Add exact FOS from FEA</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rs">
+      <div class="rc rcs"><div class="rl">Stress Reduction</div><div class="rv">~35%</div><div class="ru">Via triangulation</div></div>
+      <div class="rc rcs"><div class="rl">Post-Fix FOS</div><div class="rv">&gt;1.0</div><div class="ru">Add exact value</div></div>
+      <div class="rc"><div class="rl">Bending Moment</div><div class="rv">≈ 0</div><div class="ru">At mount node</div></div>
+      <div class="rc rcs"><div class="rl">2025 Season</div><div class="rv">✓</div><div class="ru">Cleared</div></div>
+    </div>
+  </div>
+
+  <!-- Card: Implementation photos + post-fix FEA -->
+  <div class="card sc">
+    <div class="sl sl2"><span class="n">11</span> Implementation &amp; Verified Results</div>
+    <h2>Fabrication &amp; Post-Fix FEA</h2>
+    <div class="gal">
+      <div class="gtitle">Fix Implementation — Triangulation Member &amp; Weld</div>
+      <div class="gg g3" data-gallery="fix-photos" data-sn="Fix Implementation">
+        <div class="gth" data-src="#" data-caption="New triangulation member — fit-up and tack weld before final weld. Member geometry chosen to create true two-force truss node."><div class="ph"><div class="pi">🔨</div><div class="pt">Fit-up</div><div class="pk">Fabrication</div></div><div class="gov"><div class="gi">🔍</div><div class="gc">Fit-up</div></div></div>
+        <div class="gth" data-src="#" data-caption="Completed weld — triangulation member welded to chassis frame node. Full penetration weld at both connections."><div class="ph"><div class="pi">✅</div><div class="pt">Weld complete</div><div class="pk">Weld Done</div></div><div class="gov"><div class="gi">🔍</div><div class="gc">Weld complete</div></div></div>
+        <div class="gth" data-src="#" data-caption="Final assembly — remediated chassis node. Triangulation member visible. Ready for 2025 competition."><div class="ph"><div class="pi">🏁</div><div class="pt">Final assembly</div><div class="pk">Final</div></div><div class="gov"><div class="gi">🔍</div><div class="gc">Final assembly</div></div></div>
+      </div>
+    </div>
+    <div class="gal">
+      <div class="gtitle">Post-Fix FEA Verification (ANSYS)</div>
+      <div class="gg g2" data-gallery="fix-fea" data-sn="Post-Fix FEA">
+        <div class="gth" data-src="#" data-caption="Von Mises stress — triangulated redesign. Uniform axial stress distribution. Peak stress reduced ~35% vs original."><div class="ph"><div class="pi">🌡️</div><div class="pt">Post-fix stress</div><div class="pk">Redesign — Stress</div></div><div class="gov"><div class="gi">🔍</div><div class="gc">Post-fix stress</div></div></div>
+        <div class="gth" data-src="#" data-caption="Safety factor map — redesigned node. FOS &gt; 1.0 throughout. Structural integrity confirmed for 2025 Baja SAE season."><div class="ph"><div class="pi">✅</div><div class="pt">Post-fix FOS map</div><div class="pk">FOS Confirmed</div></div><div class="gov"><div class="gi">🔍</div><div class="gc">Post-fix FOS</div></div></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <strong>Structural Remediation of BAJA ATV Chassis Member — Case Study</strong><br/>
+  Baja SAE 2025 · Mechanical Design Engineering · Chassis &amp; Suspension Structures<br/><br/>
+  <strong style="color:var(--text)">Arpit Malik</strong> · Chief Design Engineer, Team Daedalus Racing · NSUT, Delhi
+</footer>
+
+<script>
+// ─── LIGHTBOX ───────────────────────────────
+const lb=document.getElementById('lb'),lbImg=document.getElementById('lb-img'),
+      lbCap=document.getElementById('lb-cap'),lbSec=document.getElementById('lb-sec'),
+      lbDots=document.getElementById('lb-dots'),lbCnt=document.getElementById('lb-counter');
+let pool=[],idx=0;
+function openLB(imgs,i,sn){pool=imgs;idx=i;lbSec.textContent=sn||'';renderLB();lb.classList.add('open');document.body.style.overflow='hidden'}
+function closeLB(){lb.classList.remove('open');document.body.style.overflow=''}
+function go(d){idx=(idx+d+pool.length)%pool.length;renderLB()}
+function renderLB(){
+  const it=pool[idx];
+  if(it.src&&it.src!=='#'){lbImg.src=it.src;lbImg.alt=it.caption||'';lbImg.style.display='block'}
+  else{lbImg.src='';lbImg.style.display='none'}
+  lbCap.textContent=it.caption||'';
+  lbCnt.textContent=pool.length>1?`${idx+1} / ${pool.length}`:'';
+  lbDots.innerHTML='';
+  if(pool.length>1)pool.forEach((_,i)=>{const d=document.createElement('div');d.className='lbd'+(i===idx?' active':'');d.onclick=()=>{idx=i;renderLB()};lbDots.appendChild(d)})
+}
+document.getElementById('lb-prev').onclick=()=>go(-1);
+document.getElementById('lb-next').onclick=()=>go(+1);
+document.getElementById('lb-close').onclick=closeLB;
+lb.addEventListener('click',e=>{if(e.target===lb)closeLB()});
+document.addEventListener('keydown',e=>{if(!lb.classList.contains('open'))return;if(e.key==='ArrowRight')go(+1);if(e.key==='ArrowLeft')go(-1);if(e.key==='Escape')closeLB()});
+let tx=0;
+lbImg.addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});
+lbImg.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>40)go(dx<0?+1:-1)},{passive:true});
+
+// ─── CALC STRIP ─────────────────────────────
+(function(){
+  const strip = document.getElementById('calcStrip');
+  if(!strip) return;
+  const thumbs = Array.from(strip.querySelectorAll('.cs-thumb'));
+  const imgs = thumbs.map(t => ({src: t.dataset.src||'', caption: t.dataset.caption||''}));
+
+  thumbs.forEach((t,i) => {
+    t.tabIndex = 0;
+    t.setAttribute('role','button');
+    t.setAttribute('aria-label', 'Sheet ' + (i+1));
+    t.addEventListener('click', () => openLB(imgs, i, 'Handwritten Calculation Sheets'));
+    t.addEventListener('keydown', e => {
+      if(e.key === 'Enter' || e.key === ' '){e.preventDefault(); openLB(imgs, i, 'Handwritten Calculation Sheets');}
+      if(e.key === 'ArrowRight'){e.preventDefault(); const n=thumbs[i+1]; if(n){n.focus(); n.scrollIntoView({behavior:'smooth',inline:'nearest',block:'nearest'});}}
+      if(e.key === 'ArrowLeft'){e.preventDefault(); const p=thumbs[i-1]; if(p){p.focus(); p.scrollIntoView({behavior:'smooth',inline:'nearest',block:'nearest'});}}
+    });
+  });
+
+  // Material Test Report — open in lightbox
+  const mtrLink = document.getElementById('mtrLink');
+  if(mtrLink){
+    mtrLink.addEventListener('click', e => {
+      e.preventDefault();
+      openLB([{src:'4130 25.4 Materialreport.png', caption:'Material Test Report — AISI 4130 Steel (25.4 mm) · ASTM-Verified · S\u2091 = 763 MPa · S\u1d64\u1d4f\u1d57 = 855 MPa'}], 0, 'Material Test Report');
+    });
+  }
+
+  // hide scroll hint once user has scrolled the strip
+  strip.addEventListener('scroll', () => {
+    const hint = document.getElementById('csScrollHint');
+    if(hint && strip.scrollLeft > 20) hint.style.opacity = '0';
+    else if(hint) hint.style.opacity = '1';
+  }, {passive:true});
+})();
+
+// Wire regular galleries
+document.querySelectorAll('[data-gallery]').forEach(grid=>{
+  const sn=grid.dataset.sn||'';
+  const thumbs=Array.from(grid.querySelectorAll('.gth'));
+  const imgs=thumbs.map(t=>({src:t.dataset.src||'',caption:t.dataset.caption||''}));
+  thumbs.forEach((t,i)=>{t.tabIndex=0;t.role='button';t.onclick=()=>openLB(imgs,i,sn);t.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openLB(imgs,i,sn)}}})
+});
+
+// Wire before/after thumbnails (shared pool)
+const baThumbs=Array.from(document.querySelectorAll('.bath[data-gallery-id]'));
+if(baThumbs.length){
+  const baImgs=baThumbs.map(t=>({src:t.dataset.src||'',caption:t.dataset.caption||''}));
+  baThumbs.forEach((t,i)=>{t.tabIndex=0;t.role='button';t.onclick=()=>openLB(baImgs,i,'Before & After Comparison');t.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openLB(baImgs,i,'Before & After Comparison')}}})
+}
+
+// ─── STICKY NAV ACTIVE STATE ────────────────
+const navBtns=document.querySelectorAll('.nav-link');
+const markers=document.querySelectorAll('.nsm');
+navBtns.forEach(b=>b.addEventListener('click',()=>{const el=document.getElementById(b.dataset.target);if(el){const y=el.getBoundingClientRect().top+window.scrollY-64;window.scrollTo({top:y,behavior:'smooth'})}}));
+const mObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){const id=e.target.id;navBtns.forEach(b=>b.classList.toggle('active',b.dataset.target===id))}})},{rootMargin:'-10% 0px -80% 0px'});
+markers.forEach(m=>mObs.observe(m));
+
+// ─── SCROLL REVEAL CARDS ────────────────────
+const rObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');rObs.unobserve(e.target)}})},{threshold:0.06});
+document.querySelectorAll('.card').forEach((c,i)=>{c.style.transitionDelay=`${(i%3)*55}ms`;rObs.observe(c)});
+</script>
+</body>
+</html>
