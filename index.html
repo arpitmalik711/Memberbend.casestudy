@@ -745,6 +745,52 @@ footer strong{color:var(--text)}
     </div>
   </div>
 
+  <!-- Card: Why Calculated Stress > FEA Stress -->
+  <div class="card ic">
+    <div class="sl il"><span class="n">08b</span> Analytical vs FEA — Stress Discrepancy</div>
+    <h2>Why Calculated Stress is Higher than FEA Result</h2>
+    <p>The 1D hand calculation uses <strong>conservative assumptions</strong> that do not reflect real frame behaviour. FEA captures the actual 3D stress distribution more accurately. Both methods confirm the same failure zone — the magnitude difference is fully explained by four key modelling assumptions.</p>
+
+    <table class="mt">
+      <thead><tr><th>#</th><th>Assumption (Hand Calculation)</th><th>Reality (FEA / Real Frame)</th></tr></thead>
+      <tbody>
+        <tr>
+          <td style="padding-left:0;text-align:center;background:rgba(0,0,0,.15)"><span style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--accent);background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.4);border-radius:50%;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;">1</span></td>
+          <td>Member was assumed to be an <strong>isolated individual beam</strong></td>
+          <td>Load is <strong>distributed to multiple tubes</strong> in the real frame — neighbouring members share the load</td>
+        </tr>
+        <tr>
+          <td style="padding-left:0;text-align:center;background:rgba(0,0,0,.15)"><span style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--accent);background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.4);border-radius:50%;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;">2</span></td>
+          <td>Member was assumed as <strong>simply supported</strong> at both ends</td>
+          <td>Joints have <strong>some stiffness</strong> — not fully fixed, but not purely simply supported either</td>
+        </tr>
+        <tr>
+          <td style="padding-left:0;text-align:center;background:rgba(0,0,0,.15)"><span style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--accent);background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.4);border-radius:50%;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;">3</span></td>
+          <td>Load applied at a <strong>single point</strong> → point load → <strong>higher stress</strong></td>
+          <td>Load is <strong>distributed through the bracket to an area of tube</strong> — not a true point load</td>
+        </tr>
+        <tr>
+          <td style="padding-left:0;text-align:center;background:rgba(0,0,0,.15)"><span style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--accent);background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.4);border-radius:50%;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;">4</span></td>
+          <td>Assumed <strong>all 3 stresses acting at the same cross-section</strong> simultaneously</td>
+          <td>Bending is higher at the <strong>point of load application</strong>; axial is higher elsewhere; torsional stress similarly distributed — <strong>FEA combines stresses at nodes</strong> accurately</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="cb note full">
+      <div class="ct">▶ Engineering Interpretation</div>
+      <div class="cx">The hand calculation sets the <strong>safe-side upper bound</strong> — if even the conservative estimate shows FOS = 0.74, failure is certain regardless of FEA refinement. Both methods independently confirm the same conclusion: the member <strong>will fail</strong> under the 4g load case. The discrepancy is not a contradiction — it is the expected gap between a bounding analysis and a detailed simulation.</div>
+    </div>
+
+    <!-- Assumption vs Reality image -->
+    <div class="gal">
+      <div class="gtitle">Assumptions vs Reality — Handwritten Working</div>
+      <div class="gg g2" data-gallery="assump-vs-reality" data-sn="Assumptions vs Reality">
+        <div class="gth" data-src="assumptionsvsreality.jpg" data-caption="Assumptions vs Reality — handwritten page showing conservative assumptions used in 1D calculation vs actual FEA conditions."><img src="assumptionsvsreality.jpg" alt="Assumptions vs Reality" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/><div class="gov"><div class="gi">🔍</div><div class="gc">Assumptions vs Reality</div></div></div>
+      </div>
+    </div>
+  </div>
+
   <!-- ══ SOLUTION ══ -->
   <div class="nsm" id="sec-solution">Solution</div>
 
