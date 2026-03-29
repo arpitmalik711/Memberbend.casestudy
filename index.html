@@ -674,6 +674,14 @@ footer strong{color:var(--text)}
         <span class="mtr-arrow">↗</span>
       </a>
 
+      <!-- Stress-Strain Curve Comparison -->
+      <div class="gal" style="margin-top:18px">
+        <div class="gtitle">Stress-Strain Curve — Tested vs Normalised AISI 4130</div>
+        <div class="gg g2" data-gallery="stress-strain" data-sn="Stress-Strain Curve Comparison">
+          <div class="gth" data-src="stressstrain_TDRvsNORMALISE.png" data-caption="Stress-Strain curve comparison — Lab-tested AISI 4130 (TDR specimen) vs Normalised AISI 4130 (reference). S_y = 763 MPa · S_ult = 855 MPa. ASTM-verified."><img src="stressstrain_TDRvsNORMALISE.png" alt="Stress-Strain curve — Tested vs Normalised AISI 4130" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/><div class="gov"><div class="gi">🔍</div><div class="gc">Tested vs Normalised — σ-ε curve</div></div></div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -735,12 +743,13 @@ footer strong{color:var(--text)}
       <div class="rc"><div class="rl">1D ↔ 3D Correlation</div><div class="rv" style="color:var(--success)">✓</div><div class="ru">Methods agree</div></div>
     </div>
     <div class="gal">
-      <div class="gtitle">FEA Contour Plots — Pre-Fix (4 Screenshots)</div>
+      <div class="gtitle">FEA Contour Plots — Pre-Fix (5 Screenshots)</div>
       <div class="gg g4" data-gallery="fea-prefix" data-sn="FEA Pre-Fix Results">
         <div class="gth" data-src="pre.Full.vonmises.png" data-caption="Von Mises stress — full assembly. Peak stress concentration clearly visible at mid-span mount node."><img src="pre.Full.vonmises.png" alt="Von Mises stress — full assembly" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/><div class="gov"><div class="gi">🔍</div><div class="gc">Von Mises full</div></div></div>
         <div class="gth" data-src="pre.Full.deformation.png" data-caption="Total deformation plot — maximum displacement at mid-span, consistent with bending mode failure."><img src="pre.Full.deformation.png" alt="Total deformation plot" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/><div class="gov"><div class="gi">🔍</div><div class="gc">Deformation</div></div></div>
         <div class="gth" data-src="pre.failurepron1.png" data-caption="Von Mises stress — close-up at failure zone. 1031 MPa peak at weld toe of damper mount."><img src="pre.failurepron1.png" alt="Von Mises close-up — failure zone" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/><div class="gov"><div class="gi">🔍</div><div class="gc">Von Mises close-up</div></div></div>
         <div class="gth" data-src="pre.failurepron2.png" data-caption="Von Mises stress — close-up at failure zone (second view). Stress concentration at weld toe of damper mount."><img src="pre.failurepron2.png" alt="Von Mises close-up 2" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/><div class="gov"><div class="gi">🔍</div><div class="gc">Von Mises close-up 2</div></div></div>
+        <div class="gth" data-src="pre.Full.fos.png" data-caption="Factor of Safety (FOS) map — pre-fix. FOS = 0.74 at critical zone. Failure certain under 4g load case."><img src="pre.Full.fos.png" alt="FOS map pre-fix" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/><div class="gov"><div class="gi">🔍</div><div class="gc">FOS map</div></div></div>
       </div>
     </div>
   </div>
@@ -861,8 +870,8 @@ footer strong{color:var(--text)}
     <div class="gal">
       <div class="gtitle">Post-Fix FEA Verification (ANSYS)</div>
       <div class="gg g2" data-gallery="fix-fea" data-sn="Post-Fix FEA">
-        <div class="gth" data-src="#" data-caption="Von Mises stress — triangulated redesign. Uniform axial stress distribution. Peak stress reduced 0% vs original."><div class="ph"><div class="pi">🌡️</div><div class="pt">Post-fix stress</div><div class="pk">Redesign — Stress</div></div><div class="gov"><div class="gi">🔍</div><div class="gc">Post-fix stress</div></div></div>
-        <div class="gth" data-src="#" data-caption="Safety factor map — redesigned node. FOS &gt; 1.0 throughout. Structural integrity confirmed for 2025 Baja SAE season."><div class="ph"><div class="pi">✅</div><div class="pt">Post-fix FOS map</div><div class="pk">FOS Confirmed</div></div><div class="gov"><div class="gi">🔍</div><div class="gc">Post-fix FOS</div></div></div>
+        <div class="gth" data-src="post.Final.vonmises.png" data-caption="Von Mises stress — triangulated redesign. Uniform axial stress distribution. Peak stress reduced 0% vs original."><img src="post.Final.vonmises.png" alt="Post-fix stress" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/><div class="gov"><div class="gi">🔍</div><div class="gc">Post-fix stress</div></div></div>
+        <div class="gth" data-src="post.final.fos.png" data-caption="Safety factor map — redesigned node. FOS > 1.0 throughout. Structural integrity confirmed for 2025 Baja SAE season."><img src="post.final.fos.png" alt="Post-fix FOS map" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/><div class="gov"><div class="gi">🔍</div><div class="gc">Post-fix FOS</div></div></div>
       </div>
     </div>
   </div>
