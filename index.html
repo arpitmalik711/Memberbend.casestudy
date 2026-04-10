@@ -428,6 +428,15 @@ footer strong{color:var(--text)}
   <button class="lba" id="lb-next">›</button>
 </div>
 
+<!-- VIDEO MODAL -->
+<div id="vmod" style="display:none;position:fixed;inset:0;z-index:950;background:rgba(5,7,12,.96);backdrop-filter:blur(10px);flex-direction:column;align-items:center;justify-content:center;gap:16px" role="dialog" aria-modal="true" aria-label="Video viewer">
+  <button id="vmod-close" aria-label="Close video" style="position:fixed;top:14px;right:14px;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#fff;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:background .2s;z-index:951">✕</button>
+  <video id="vmod-video" loop muted playsinline controls
+    style="max-width:min(92vw,640px);max-height:72vh;border-radius:10px;box-shadow:0 32px 96px rgba(0,0,0,.8);outline:none">
+  </video>
+  <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.3);letter-spacing:.1em;text-transform:uppercase">TAP OUTSIDE OR PRESS ESC TO CLOSE</div>
+</div>
+
 <!-- ① STICKY NAV -->
 <nav id="snav">
   <a class="nav-back" href="https://arpitmalik711.github.io/Portfolio/">&#8592; Back to Full Portfolio</a>
@@ -512,7 +521,7 @@ footer strong{color:var(--text)}
       <div class="gg g3" data-gallery="bg" data-sn="Competition Context">
         <div class="gth" data-src="competition.png" data-caption="Team Daedalus Racing — Baja SAE 2025 competition · NSUT, Delhi"><img src="competition.png" alt="Competition — Baja SAE 2025" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/><div class="gov"><div class="gi">🔍</div><div class="gc">Competition — Baja SAE 2025</div></div></div>
         <div class="gth" data-src="vehicle.jpeg" data-caption="Vehicle — side profile"><img src="vehicle.jpeg" alt="Vehicle" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/><div class="gov"><div class="gi">🔍</div><div class="gc">Side profile</div></div></div>
-        <div class="gth" data-src="team.jpeg" data-caption="Team Daedalus Racing — Baja SAE 2025 · NSUT, Delhi"><img src="team.jpeg" alt="Team Daedalus Racing" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/><div class="ph" style="display:none"><div class="pi">📷</div><div class="pt">Team</div><div class="pk">Team</div></div><div class="gov"><div class="gi">🔍</div><div class="gc">Team Daedalus Racing</div></div></div>
+        <div class="gth" data-src="team.png" data-caption="Team Daedalus Racing — Baja SAE 2025 · NSUT, Delhi"><img src="team.png" alt="Team Daedalus Racing" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/><div class="ph" style="display:none"><div class="pi">📷</div><div class="pt">Team</div><div class="pk">Team</div></div><div class="gov"><div class="gi">🔍</div><div class="gc">Team Daedalus Racing</div></div></div>
       </div>
     </div>
   </div>
@@ -892,44 +901,77 @@ footer strong{color:var(--text)}
   <!-- Card: Closing the Loop -->
   <div class="card sc">
     <div class="sl sl2"><span class="n">★</span> Closing the Loop</div>
-    <h2>The Redemption — ATVC India 2025</h2>
-    <p>The same obstacle that caused the failure became the proving ground. After the triangulated redesign was validated and welded, Team Daedalus Racing returned to competition — and answered the failure with a result.</p>
+    <h2>The Redemption — ATVC India 2025 &amp; 2026</h2>
+    <p>The same obstacle that caused the failure became the proving ground. After the triangulated redesign was validated and welded, Team Daedalus Racing returned to competition — and answered the failure with back-to-back results.</p>
 
-    <div style="margin:18px 0;border-radius:10px;overflow:hidden;border:2px solid rgba(34,197,94,.35);position:relative;background:var(--card2)">
-      <img src="vehicle_landing.gif" alt="Vehicle landing from obstacle — ATVC India 2025"
-        style="width:100%;display:block;border-radius:8px"
-        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
-      <!-- fallback placeholder shown if gif not found -->
-      <div style="display:none;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:40px 20px;min-height:180px">
-        <div style="font-size:36px">🚗</div>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;text-align:center">Add vehicle_landing.gif — vehicle clearing obstacle</div>
+    <!-- ── Two competition blocks side by side on desktop ── -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px">
+
+      <!-- ATVC 2025 -->
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="font-family:var(--mono);font-size:9.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--success);display:flex;align-items:center;gap:6px">
+          <span style="width:6px;height:6px;border-radius:50%;background:var(--success);display:inline-block"></span>ATVC India 2025
+        </div>
+        <div id="vmod-trigger" style="border-radius:10px;overflow:hidden;border:2px solid rgba(34,197,94,.35);position:relative;background:var(--card2);cursor:pointer;transition:border-color .2s,transform .2s" onclick="openVmod(0)">
+          <video src="vehicle_landing.mp4" autoplay loop muted playsinline
+            style="width:100%;height:150px;object-fit:cover;display:block;pointer-events:none"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          </video>
+          <div style="display:none;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:30px 12px;min-height:150px">
+            <div style="font-size:28px">🚗</div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;text-align:center">Add vehicle_landing.mp4</div>
+          </div>
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);opacity:0;transition:opacity .2s;border-radius:8px" class="vplay-ov">
+            <div style="width:40px;height:40px;border-radius:50%;background:rgba(34,197,94,.25);border:2px solid rgba(34,197,94,.7);display:flex;align-items:center;justify-content:center;font-size:17px;backdrop-filter:blur(4px)">▶</div>
+          </div>
+          <div style="position:absolute;bottom:8px;left:8px;background:rgba(8,11,18,.82);backdrop-filter:blur(6px);border:1px solid rgba(34,197,94,.35);border-radius:5px;padding:4px 8px;font-family:var(--mono);font-size:8.5px;color:var(--success);text-transform:uppercase;letter-spacing:.07em">
+            ● S&amp;T Event
+          </div>
+        </div>
+        <div style="background:var(--card2);border:1px solid rgba(34,197,94,.3);border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:12px">
+          <div style="font-family:var(--cond);font-size:38px;font-weight:800;color:var(--success);line-height:1;flex-shrink:0">AIR 1</div>
+          <div>
+            <div style="font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)">Suspension &amp; Traction</div>
+            <div style="font-size:12px;color:var(--text);margin-top:2px">Zero structural failures · Full event</div>
+          </div>
+        </div>
       </div>
-      <div style="position:absolute;bottom:10px;left:10px;background:rgba(8,11,18,.82);backdrop-filter:blur(6px);border:1px solid rgba(34,197,94,.35);border-radius:6px;padding:5px 10px;font-family:var(--mono);font-size:9.5px;color:var(--success);text-transform:uppercase;letter-spacing:.08em">
-        ● ATVC India 2025 — Suspension &amp; Traction
+
+      <!-- ATVC 2026 -->
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="font-family:var(--mono);font-size:9.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent2);display:flex;align-items:center;gap:6px">
+          <span style="width:6px;height:6px;border-radius:50%;background:var(--accent2);display:inline-block"></span>ATVC India 2026
+        </div>
+        <div id="vmod-trigger-2" style="border-radius:10px;overflow:hidden;border:2px solid rgba(56,189,248,.35);position:relative;background:var(--card2);cursor:pointer;transition:border-color .2s,transform .2s" onclick="openVmod(1)">
+          <video src="vehicle_landing_2026.mp4" autoplay loop muted playsinline
+            style="width:100%;height:150px;object-fit:cover;display:block;pointer-events:none"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          </video>
+          <div style="display:none;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:30px 12px;min-height:150px">
+            <div style="font-size:28px">🚗</div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;text-align:center">Add vehicle_landing_2026.mp4</div>
+          </div>
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);opacity:0;transition:opacity .2s;border-radius:8px" class="vplay-ov2">
+            <div style="width:40px;height:40px;border-radius:50%;background:rgba(56,189,248,.2);border:2px solid rgba(56,189,248,.6);display:flex;align-items:center;justify-content:center;font-size:17px;backdrop-filter:blur(4px)">▶</div>
+          </div>
+          <div style="position:absolute;bottom:8px;left:8px;background:rgba(8,11,18,.82);backdrop-filter:blur(6px);border:1px solid rgba(56,189,248,.35);border-radius:5px;padding:4px 8px;font-family:var(--mono);font-size:8.5px;color:var(--accent2);text-transform:uppercase;letter-spacing:.07em">
+            ● Overall
+          </div>
+        </div>
+        <div style="background:var(--card2);border:1px solid rgba(56,189,248,.3);border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:12px">
+          <div style="font-family:var(--cond);font-size:38px;font-weight:800;color:var(--accent2);line-height:1;flex-shrink:0">AIR 2</div>
+          <div>
+            <div style="font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)">Overall · ATVC India 2026</div>
+            <div style="font-size:12px;color:var(--text);margin-top:2px">Chassis held · Full competition</div>
+          </div>
+        </div>
       </div>
+
     </div>
 
-    <div class="rs" style="margin-top:18px">
-      <div class="rc rcs" style="flex:2;min-width:180px">
-        <div class="rl">Final Standing</div>
-        <div class="rv" style="font-size:42px;color:var(--success)">AIR 1</div>
-        <div class="ru">Suspension &amp; Traction Event · ATVC India 2025</div>
-      </div>
-      <div class="rc rcs">
-        <div class="rl">Event</div>
-        <div class="rv" style="font-size:22px">S&amp;T</div>
-        <div class="ru">Suspension &amp; Traction</div>
-      </div>
-      <div class="rc rcs">
-        <div class="rl">Chassis Status</div>
-        <div class="rv" style="font-size:22px">✓</div>
-        <div class="ru">Zero failures — full event</div>
-      </div>
-    </div>
-
-    <div class="cb fix full" style="margin-top:14px">
+    <div class="cb fix full" style="margin-top:18px">
       <div class="ct">◈ Loop Closed</div>
-      <div class="cx">The failure at Baja SAE 2025 — caused by the vehicle landing from a height obstacle during the Suspension &amp; Traction test — was analysed, root-caused, and structurally remediated. The same dynamic event at ATVC India 2025 was completed with <strong>zero structural failures</strong>, securing <strong>All India Rank 1</strong> in Suspension &amp; Traction.</div>
+      <div class="cx">The failure at Baja SAE 2025 — caused by the vehicle landing from a height obstacle — was analysed, root-caused, and structurally remediated. The redesigned chassis went on to secure <strong>AIR 1 in Suspension &amp; Traction at ATVC India 2025</strong>, and <strong>AIR 2 Overall at ATVC India 2026</strong>, clearing the same dynamic obstacle both times with zero structural failures.</div>
     </div>
   </div>
 
@@ -1038,6 +1080,47 @@ markers.forEach(m=>mObs.observe(m));
 // ─── SCROLL REVEAL CARDS ────────────────────
 const rObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');rObs.unobserve(e.target)}})},{threshold:0.06});
 document.querySelectorAll('.card').forEach((c,i)=>{c.style.transitionDelay=`${(i%3)*55}ms`;rObs.observe(c)});
+
+// ─── VIDEO MODAL ────────────────────────────
+const vmod=document.getElementById('vmod');
+const vmodVideo=document.getElementById('vmod-video');
+const vmodTrigger=document.getElementById('vmod-trigger');
+const vmodTrigger2=document.getElementById('vmod-trigger-2');
+const vplayOv=vmodTrigger?.querySelector('.vplay-ov');
+const vplayOv2=vmodTrigger2?.querySelector('.vplay-ov2');
+
+const vSrcs=['vehicle_landing.mp4','vehicle_landing_2026.mp4'];
+
+function openVmod(idx){
+  vmodVideo.src=vSrcs[idx||0];
+  vmod.style.display='flex';
+  document.body.style.overflow='hidden';
+  vmodVideo.currentTime=0;
+  vmodVideo.play();
+}
+function closeVmod(){
+  vmod.style.display='none';
+  document.body.style.overflow='';
+  vmodVideo.pause();
+  vmodVideo.src='';
+}
+
+document.getElementById('vmod-close').onclick=closeVmod;
+vmod.addEventListener('click',e=>{if(e.target===vmod)closeVmod()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&vmod.style.display==='flex')closeVmod()});
+
+// hover — show play overlays
+[[vmodTrigger,vplayOv,0],[vmodTrigger2,vplayOv2,1]].forEach(([el,ov,idx])=>{
+  if(!el||!ov)return;
+  el.addEventListener('mouseenter',()=>ov.style.opacity='1');
+  el.addEventListener('mouseleave',()=>ov.style.opacity='0');
+  el.addEventListener('focus',()=>ov.style.opacity='1');
+  el.addEventListener('blur',()=>ov.style.opacity='0');
+  el.tabIndex=0;
+  el.setAttribute('role','button');
+  el.setAttribute('aria-label','Play video');
+  el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openVmod(idx)}});
+});
 </script>
 </body>
 </html>
