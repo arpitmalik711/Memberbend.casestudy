@@ -169,7 +169,7 @@ footer strong{color:var(--text)}
 .cb.fix{background:rgba(34,197,94,.06);border-color:rgba(34,197,94,.2)}.cb.fix .ct{color:var(--success)}
 .cb.note{background:rgba(249,115,22,.06);border-color:rgba(249,115,22,.2)}.cb.note .ct{color:var(--accent)}
 .cb.info{background:rgba(56,189,248,.05);border-color:rgba(56,189,248,.15)}.cb.info .ct{color:var(--accent2)}
-.fml{font-family:var(--mono);font-size:12.5px;color:var(--sub);background:none;border:none;border-radius:0;padding:0;white-space:nowrap}
+.fml{font-family:var(--mono);font-size:12.5px;color:var(--accent2);font-weight:700;background:none;border:none;border-radius:0;padding:0;white-space:nowrap}
 .cb.full{margin:12px 0}
 
 /* ── TIMELINE ── */
@@ -601,7 +601,7 @@ footer strong{color:var(--text)}
     <div class="sl dl"><span class="n">05</span> Root Cause Analysis</div>
     <h2>Why the Failure Occurred</h2>
     <p>Mid-span mount → simultaneous <strong>bending + axial + twisting</strong>. Combined σ<sub>VM</sub> = 1136 MPa. FOS = 0.67. Failure certain.</p>
-    <div class="cb info full"><div class="ct">◈ Analytical Method — Euler–Bernoulli Beam Theory + Torsion</div><div class="cx">(1) Decompose damper axis force into transverse &amp; axial components at mount node under 4g.<br/>(2) Free-body diagram of chassis member.<br/>(3) Bending moment: <span class="fml">M = F·a(L−a)/L</span> (peak at mount, a = 241 mm (9.5 in) from Node 1).<br/>(4) Bending stress: <span class="fml">σ<sub>b</sub> = M·c/I</span> (extreme fibre); τ<sub>twist</sub> = T·c/J from torsion; σ<sub>axial</sub> = F<sub>∥</sub>/A<sub>pipe</sub>.<br/>(5) Von Mises: <span class="fml">σ<sub>VM</sub> = √(σ² + 3τ²)</span> where <span class="fml">σ = σ<sub>axial</sub> + σ<sub>b</sub></span> and <span class="fml">τ = τ<sub>twist</sub></span> → <strong>1136 MPa</strong>.<br/>(6) FOS = S<sub>yield</sub>/σ<sub>VM</sub> = 763/1136 = <strong>0.67</strong> — structural failure was mathematically certain.</div></div>
+    <div class="cb info full"><div class="ct">◈ Analytical Method — Euler–Bernoulli Beam Theory + Torsion</div><div class="cx">(1) Decompose damper axis force into transverse &amp; axial components at mount node under 4g.<br/>(2) Free-body diagram of chassis member.<br/>(3) Bending moment: <span class="fml">M = F·a(L−a)/L</span> (peak at mount, a = 241 mm (9.5 in) from Node 1).<br/>(4) Bending stress: <span class="fml">σ<sub>b</sub> = M·c/I</span> (extreme fibre); <span class="fml">τ<sub>twist</sub> = T·c/J</span> from torsion; <span class="fml">σ<sub>axial</sub> = F<sub>∥</sub>/A<sub>pipe</sub></span>.<br/>(5) Von Mises: <span class="fml">σ<sub>VM</sub> = √(σ² + 3τ²)</span> where <span class="fml">σ = σ<sub>axial</sub> + σ<sub>b</sub></span> and <span class="fml">τ = τ<sub>twist</sub></span> → <strong>1136 MPa</strong>.<br/>(6) FOS = S<sub>yield</sub>/σ<sub>VM</sub> = 763/1136 = <strong>0.67</strong> — structural failure was mathematically certain.</div></div>
     <div class="rs">
       <div class="rc rcd"><div class="rl">Calculated σ<sub>VM</sub></div><div class="rv">1136</div><div class="ru">MPa at bracket pipe cross-section</div></div>
       <div class="rc rcw"><div class="rl">S<sub>ult</sub> Material</div><div class="rv">855</div><div class="ru">MPa lab-verified</div></div>
