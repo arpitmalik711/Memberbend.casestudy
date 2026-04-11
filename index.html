@@ -198,7 +198,14 @@ footer strong{color:var(--text)}
 #lb{display:none;position:fixed;inset:0;z-index:900;background:rgba(5,7,12,.95);backdrop-filter:blur(8px);flex-direction:column;align-items:center;justify-content:center}
 #lb.open{display:flex}
 #lb-wrap{position:relative;max-width:min(92vw,960px);max-height:78vh;display:flex;align-items:center;justify-content:center}
-#lb-img{max-width:100%;max-height:78vh;border-radius:6px;box-shadow:0 32px 96px rgba(0,0,0,.8);object-fit:contain;user-select:none;touch-action:pinch-zoom}
+#lb-img{max-width:100%;max-height:78vh;border-radius:6px;box-shadow:0 32px 96px rgba(0,0,0,.8);object-fit:contain;user-select:none;touch-action:none;cursor:zoom-in;transform-origin:center center;will-change:transform;transition:transform .08s ease}
+#lb-img.zoomed{cursor:grab}
+#lb-img.grabbing{cursor:grabbing;transition:none}
+#lb-zoom-bar{position:fixed;bottom:66px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;background:rgba(8,10,16,.82);border:1px solid rgba(255,255,255,.13);border-radius:24px;padding:7px 16px;font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.8);opacity:0;transition:opacity .3s;z-index:902;white-space:nowrap;backdrop-filter:blur(8px);pointer-events:none}
+#lb-zoom-bar.show{opacity:1;pointer-events:auto}
+#lb-zoom-pct{min-width:36px;text-align:center;color:var(--accent);font-weight:700}
+#lb-zoom-reset{background:none;border:1px solid rgba(249,115,22,.35);border-radius:10px;color:var(--accent);cursor:pointer;font-family:var(--mono);font-size:10px;padding:2px 8px;transition:background .2s}
+#lb-zoom-reset:hover{background:rgba(249,115,22,.15)}
 #lb-counter{position:absolute;top:-30px;right:0;font-family:var(--mono);font-size:10px;color:var(--muted)}
 #lb-caption{margin-top:12px;max-width:min(92vw,680px);padding:0 16px;text-align:center}
 #lb-sec{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
@@ -424,6 +431,7 @@ footer strong{color:var(--text)}
   </div>
   <div id="lb-dots"></div>
   <div id="lb-swipe">← SWIPE OR USE ARROW KEYS →</div>
+  <div id="lb-zoom-bar"><span>🔍</span><span id="lb-zoom-pct">100%</span><button id="lb-zoom-reset">RESET</button></div>
   <button class="lba" id="lb-prev">‹</button>
   <button class="lba" id="lb-next">›</button>
 </div>
@@ -486,7 +494,7 @@ footer strong{color:var(--text)}
   <div class="card ic">
     <div class="sl il"><span class="n">01</span> Project Overview</div>
     <h2>Structural Remediation of BAJA ATV Chassis Member</h2>
-    <p><strong>Problem:</strong> Mid-span damper mount → bending-dominated failure under 4g. Plastic deformation + weld cracking.</p>
+    <p><strong>Problem:</strong> Mid-span damper mount → bending-dominated failure under 4g. Plastic deformation + Crack initiation at Chessis Member Crossection.</p>
     <p><strong>Method:</strong> 1D beam theory + ANSYS FEA correlation → root cause confirmed → triangulated load path redesign.</p>
     <p><strong>Result:</strong> FEA stress 831 → 555 MPa. Min FOS 0.92 → 1.37. Competition cleared.</p>
 
@@ -996,10 +1004,48 @@ footer strong{color:var(--text)}
 const lb=document.getElementById('lb'),lbImg=document.getElementById('lb-img'),
       lbCap=document.getElementById('lb-cap'),lbSec=document.getElementById('lb-sec'),
       lbDots=document.getElementById('lb-dots'),lbCnt=document.getElementById('lb-counter');
+const lbZoomBar=document.getElementById('lb-zoom-bar'),lbZoomPct=document.getElementById('lb-zoom-pct'),lbZoomReset=document.getElementById('lb-zoom-reset');
 let pool=[],idx=0;
-function openLB(imgs,i,sn){pool=imgs;idx=i;lbSec.textContent=sn||'';renderLB();lb.classList.add('open');document.body.style.overflow='hidden'}
-function closeLB(){lb.classList.remove('open');document.body.style.overflow=''}
-function go(d){idx=(idx+d+pool.length)%pool.length;renderLB()}
+
+// ── Zoom / Pan state ──
+let scale=1,tx=0,ty=0,zoomTimer=null;
+const MIN_SCALE=1,MAX_SCALE=2;
+
+function clampTx(s,dtx){
+  const imgW=lbImg.naturalWidth||lbImg.offsetWidth,wrapW=lbImg.offsetWidth;
+  const overflow=Math.max(0,(wrapW*s-wrapW)/2);
+  return Math.min(overflow/s,Math.max(-overflow/s,dtx));
+}
+function clampTy(s,dty){
+  const imgH=lbImg.naturalHeight||lbImg.offsetHeight,wrapH=lbImg.offsetHeight;
+  const overflow=Math.max(0,(wrapH*s-wrapH)/2);
+  return Math.min(overflow/s,Math.max(-overflow/s,dty));
+}
+function applyZoom(newScale,originX,originY,instant){
+  const prev=scale;
+  scale=Math.min(MAX_SCALE,Math.max(MIN_SCALE,newScale));
+  if(originX!=null){
+    const rect=lbImg.getBoundingClientRect();
+    const ox=(originX-rect.left-rect.width/2)/prev;
+    const oy=(originY-rect.top-rect.height/2)/prev;
+    tx+=ox*(prev-scale);ty+=oy*(prev-scale);
+  }
+  tx=clampTx(scale,tx);ty=clampTy(scale,ty);
+  lbImg.style.transition=instant?'none':'transform .08s ease';
+  lbImg.style.transform=`scale(${scale}) translate(${tx}px,${ty}px)`;
+  lbImg.classList.toggle('zoomed',scale>1);
+  updateZoomBar();
+}
+function resetZoom(){applyZoom(1,null,null,false);tx=0;ty=0;applyZoom(1)}
+function updateZoomBar(){
+  lbZoomPct.textContent=Math.round(scale*100)+'%';
+  if(scale>1){lbZoomBar.classList.add('show');clearTimeout(zoomTimer);}
+  else{clearTimeout(zoomTimer);zoomTimer=setTimeout(()=>lbZoomBar.classList.remove('show'),1200);}
+}
+
+function openLB(imgs,i,sn){pool=imgs;idx=i;lbSec.textContent=sn||'';renderLB();lb.classList.add('open');document.body.style.overflow='hidden';resetZoom()}
+function closeLB(){lb.classList.remove('open');document.body.style.overflow='';resetZoom()}
+function go(d){if(scale>1)return;idx=(idx+d+pool.length)%pool.length;renderLB();resetZoom()}
 function renderLB(){
   const it=pool[idx];
   if(it.src&&it.src!=='#'){lbImg.src=it.src;lbImg.alt=it.caption||'';lbImg.style.display='block'}
@@ -1007,16 +1053,98 @@ function renderLB(){
   lbCap.textContent=it.caption||'';
   lbCnt.textContent=pool.length>1?`${idx+1} / ${pool.length}`:'';
   lbDots.innerHTML='';
-  if(pool.length>1)pool.forEach((_,i)=>{const d=document.createElement('div');d.className='lbd'+(i===idx?' active':'');d.onclick=()=>{idx=i;renderLB()};lbDots.appendChild(d)})
+  if(pool.length>1)pool.forEach((_,i)=>{const d=document.createElement('div');d.className='lbd'+(i===idx?' active':'');d.onclick=()=>{if(scale<=1){idx=i;renderLB();resetZoom()}};lbDots.appendChild(d)})
 }
 document.getElementById('lb-prev').onclick=()=>go(-1);
 document.getElementById('lb-next').onclick=()=>go(+1);
 document.getElementById('lb-close').onclick=closeLB;
+lbZoomReset.onclick=()=>{tx=0;ty=0;applyZoom(1,null,null,false)};
 lb.addEventListener('click',e=>{if(e.target===lb)closeLB()});
-document.addEventListener('keydown',e=>{if(!lb.classList.contains('open'))return;if(e.key==='ArrowRight')go(+1);if(e.key==='ArrowLeft')go(-1);if(e.key==='Escape')closeLB()});
-let tx=0;
-lbImg.addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});
-lbImg.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>40)go(dx<0?+1:-1)},{passive:true});
+document.addEventListener('keydown',e=>{
+  if(!lb.classList.contains('open'))return;
+  if(e.key==='ArrowRight')go(+1);
+  if(e.key==='ArrowLeft')go(-1);
+  if(e.key==='Escape')closeLB();
+  if(e.key==='+'||e.key==='=')applyZoom(scale*1.3);
+  if(e.key==='-')applyZoom(scale/1.3);
+  if(e.key==='0'){tx=0;ty=0;applyZoom(1)}
+});
+
+// ── Mouse wheel zoom ──
+lbImg.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const delta=e.deltaY<0?1.15:1/1.15;
+  applyZoom(scale*delta,e.clientX,e.clientY,true);
+  lbZoomBar.classList.add('show');clearTimeout(zoomTimer);
+  zoomTimer=setTimeout(()=>{if(scale<=1)lbZoomBar.classList.remove('show')},1800);
+},{passive:false});
+
+// ── Double-click to zoom in/out ──
+lbImg.addEventListener('dblclick',e=>{
+  if(scale>1){tx=0;ty=0;applyZoom(1,null,null,false);}
+  else{applyZoom(2,e.clientX,e.clientY,false);}
+});
+
+// ── Mouse drag to pan ──
+let isDragging=false,dragX=0,dragY=0,startTx=0,startTy=0;
+lbImg.addEventListener('mousedown',e=>{
+  if(scale<=1)return;e.preventDefault();
+  isDragging=true;dragX=e.clientX;dragY=e.clientY;startTx=tx;startTy=ty;
+  lbImg.classList.add('grabbing');
+});
+window.addEventListener('mousemove',e=>{
+  if(!isDragging)return;
+  tx=clampTx(scale,startTx+(e.clientX-dragX)/scale);
+  ty=clampTy(scale,startTy+(e.clientY-dragY)/scale);
+  lbImg.style.transition='none';
+  lbImg.style.transform=`scale(${scale}) translate(${tx}px,${ty}px)`;
+});
+window.addEventListener('mouseup',()=>{isDragging=false;lbImg.classList.remove('grabbing')});
+
+// ── Touch: pinch-zoom + swipe ──
+let touches={},pinchDist=null,pinchMidX=0,pinchMidY=0,swipeStartX=0,swipeStartY=0,swipeMoved=false,touchStartTx=0,touchStartTy=0;
+function getTouchDist(a,b){return Math.hypot(b.clientX-a.clientX,b.clientY-a.clientY)}
+
+lbImg.addEventListener('touchstart',e=>{
+  if(e.touches.length===2){
+    pinchDist=getTouchDist(e.touches[0],e.touches[1]);
+    pinchMidX=(e.touches[0].clientX+e.touches[1].clientX)/2;
+    pinchMidY=(e.touches[0].clientY+e.touches[1].clientY)/2;
+    touchStartTx=tx;touchStartTy=ty;
+  } else if(e.touches.length===1){
+    swipeStartX=e.touches[0].clientX;swipeStartY=e.touches[0].clientY;
+    swipeMoved=false;touchStartTx=tx;touchStartTy=ty;
+  }
+},{passive:true});
+
+lbImg.addEventListener('touchmove',e=>{
+  if(e.touches.length===2){
+    e.preventDefault();
+    const d=getTouchDist(e.touches[0],e.touches[1]);
+    const ratio=d/pinchDist;
+    const mx=(e.touches[0].clientX+e.touches[1].clientX)/2;
+    const my=(e.touches[0].clientY+e.touches[1].clientY)/2;
+    applyZoom(scale*ratio,mx,my,true);
+    pinchDist=d;
+    lbZoomBar.classList.add('show');
+  } else if(e.touches.length===1&&scale>1){
+    e.preventDefault();swipeMoved=true;
+    tx=clampTx(scale,touchStartTx+(e.touches[0].clientX-swipeStartX)/scale);
+    ty=clampTy(scale,touchStartTy+(e.touches[0].clientY-swipeStartY)/scale);
+    lbImg.style.transition='none';
+    lbImg.style.transform=`scale(${scale}) translate(${tx}px,${ty}px)`;
+  }
+},{passive:false});
+
+lbImg.addEventListener('touchend',e=>{
+  if(e.changedTouches.length===1&&scale<=1&&!swipeMoved){
+    const dx=e.changedTouches[0].clientX-swipeStartX;
+    if(Math.abs(dx)>40)go(dx<0?+1:-1);
+  }
+  if(e.touches.length<2)pinchDist=null;
+  clearTimeout(zoomTimer);
+  zoomTimer=setTimeout(()=>{if(scale<=1)lbZoomBar.classList.remove('show')},1800);
+},{passive:true});
 
 // ─── CALC STRIP ─────────────────────────────
 (function(){
